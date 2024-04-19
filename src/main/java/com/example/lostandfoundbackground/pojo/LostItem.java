@@ -1,7 +1,11 @@
 package com.example.lostandfoundbackground.pojo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import org.apache.ibatis.annotations.Update;
+import org.hibernate.validator.constraints.URL;
 
 import java.time.LocalDateTime;
 
@@ -10,6 +14,7 @@ import java.time.LocalDateTime;
  */
 @Data
 public class LostItem {
+    @NotNull(groups = Update.class,message = "id不能为空")
     private Long id;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
@@ -17,6 +22,8 @@ public class LostItem {
     private LocalDateTime updateTime;
     private String name;
     private Boolean founded;//是否已经找到
+    @NotEmpty
+    @URL
     private String image;
     private Long categoryId;
     private String foundLocation;

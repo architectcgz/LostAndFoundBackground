@@ -6,6 +6,9 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import jakarta.validation.constraints.NotNull;
+import org.apache.ibatis.annotations.Update;
+import org.hibernate.validator.constraints.URL;
+
 import java.time.LocalDateTime;
 
 /**
@@ -13,9 +16,8 @@ import java.time.LocalDateTime;
  */
 @Data
 public class User {
-    @NotNull
+    @NotNull(groups = Update.class,message = "id不能为空")
     private Long id;
-    private String username;
     @JsonIgnore//Json转换时忽略password这个属性
     private String password;
 
@@ -24,6 +26,7 @@ public class User {
     private String name;
 
     @NotEmpty
+    @URL
     private String avatar;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
