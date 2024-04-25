@@ -1,7 +1,7 @@
 package com.example.lostandfoundbackground.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,22 +15,14 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class FoundItem {
-    @NotNull(groups = Update.class,message = "id不能为空")
+public class CategoryDTO {
+    @NotEmpty(groups = Update.class,message = "id不能为空")
     private Long id;
+    private String categoryName;
+    private String categoryAlias;
+    private Long createUser;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
-    private String name;
-    private Boolean claimed;
-    private String image;
-    private Long categoryId;
-    private String foundLocation;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime foundTime;
-    private String description;
-    private String ownerName;//失主名称
-    private String phone;
-    private Long createUser;//创建的用户id
 }

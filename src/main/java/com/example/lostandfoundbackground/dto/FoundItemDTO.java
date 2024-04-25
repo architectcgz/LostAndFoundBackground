@@ -1,15 +1,11 @@
 package com.example.lostandfoundbackground.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import jakarta.validation.constraints.NotNull;
 import lombok.NoArgsConstructor;
 import org.apache.ibatis.annotations.Update;
-import org.hibernate.validator.constraints.URL;
 
 import java.time.LocalDateTime;
 
@@ -19,21 +15,22 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
+public class FoundItemDTO {
     @NotNull(groups = Update.class,message = "id不能为空")
     private Long id;
-    @JsonIgnore//Json转换时忽略password这个属性
-    private String password;
-
-    @NotEmpty
-    @Pattern(regexp = "^\\S{1,10}$")
-    private String name;
-
-    @NotEmpty
-    @URL
-    private String avatar;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
+    private String name;
+    private Boolean claimed;
+    private String image;
+    private Long categoryId;
+    private String foundLocation;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime foundTime;
+    private String description;
+    private String ownerName;//失主名称
+    private String phone;
+    private Long createUser;//创建的用户id
 }
