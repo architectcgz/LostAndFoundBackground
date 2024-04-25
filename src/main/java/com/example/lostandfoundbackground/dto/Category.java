@@ -2,7 +2,9 @@ package com.example.lostandfoundbackground.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotEmpty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.ibatis.annotations.Update;
 
 import java.time.LocalDateTime;
@@ -11,6 +13,8 @@ import java.time.LocalDateTime;
  * @author archi
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Category {
     @NotEmpty(groups = Update.class,message = "id不能为空")
     private Long id;
