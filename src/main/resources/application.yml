@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: LostAndFoundBackground
+  datasource:
+    #这里的数据库和redis用户名和密码都是加密过后的
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: A+seNuwXDx9YxZubCWEeUD/ANZ5R7E+aAXP8yCZX1vOv8cn3JPbSNqV66k7XWt0UVcPe3LJzxjmu2TcNQl+NCw==
+    username: ra98GqhVrC8bpXUdu5PUoA==
+    password: GyP6U3YWVOcwOhnYdZWORPIEtt3OYr0D
+  data:
+    redis:
+      host: DfvzKU6Ox5RbKbhZv+X1fRufwLHtnsgb
+      port: 6379
+      password: KnWT0UW9I4RtPRALgE/yWA==
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+
+  mapper-locations: classpath:mapper/*.xml
+
+jasypt:
+  encryptor:
+    password: ${JASYPT_ENCRYPTOR_PASSWORD:}
+
