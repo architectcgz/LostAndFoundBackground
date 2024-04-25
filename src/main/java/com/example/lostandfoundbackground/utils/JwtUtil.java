@@ -7,7 +7,8 @@ import java.util.Date;
 import java.util.Map;
 
 public class JwtUtil {
-    private static final String KEY = "swzllxy23411asd0asd0./?123";
+    //从环境变量中获取JWTKey
+    private static final String KEY = System.getenv("JWT_KEY");
 
     //接收业务数据,生成token并返回
     public static String genToken(Map<String, Object> claims) {
