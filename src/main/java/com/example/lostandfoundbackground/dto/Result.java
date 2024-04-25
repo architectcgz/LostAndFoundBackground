@@ -1,4 +1,4 @@
-package com.example.lostandfoundbackground.pojo;
+package com.example.lostandfoundbackground.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

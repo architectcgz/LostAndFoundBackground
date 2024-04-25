@@ -9,8 +9,8 @@ public class JasyptTest {
         //这里使用了环境变量里的salt
         textEncryptor.setPassword("${JASYPT_ENCRYPTOR_PASSWORD:}");
         //要加密的数据 数据库的用户名和密码
-        String username = textEncryptor.encrypt("testUsername");
-        String password = textEncryptor.encrypt("testPassword");
+        String username = textEncryptor.encrypt("47.97.116.255");
+        String password = textEncryptor.encrypt("123456");
         System.out.println(username);
         System.out.println(password);
         //解密测试

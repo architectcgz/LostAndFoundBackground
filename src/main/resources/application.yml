@@ -21,5 +21,6 @@ mybatis:
 
 jasypt:
   encryptor:
+    #从环境变量中获取
     password: ${JASYPT_ENCRYPTOR_PASSWORD:}
 
