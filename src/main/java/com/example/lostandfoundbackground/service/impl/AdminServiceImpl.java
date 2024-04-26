@@ -14,6 +14,7 @@ import com.example.lostandfoundbackground.utils.RegexUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,7 @@ import static com.example.lostandfoundbackground.constants.RedisConstants.LOGIN_
  * @author archi
  */
 @Service
+@Slf4j
 public class AdminServiceImpl implements AdminService {
     private static final ObjectMapper MAPPER = new ObjectMapper();
     @Resource
@@ -41,6 +43,8 @@ public class AdminServiceImpl implements AdminService {
         String password = loginForm.getPassword();
         if(!(RegexUtils.isPhoneValid(phone)&&RegexUtils.isPasswordValid(password))){
             //不符合手机号的格式，返回错误信息
+            log.info("手机号是否符合格式:"+ RegexUtils.isPhoneValid(phone));
+            log.info("密码是否符合格式"+ RegexUtils.isPasswordValid(password));
             return Result.fail("手机号码或密码格式错误");
         }
         //得到加密后的字符串

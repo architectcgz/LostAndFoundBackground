@@ -17,6 +17,7 @@
         )
     </insert>
     <select id="findAdminByPhone" resultType="com.example.lostandfoundbackground.entity.Administrator">
-        select id,name,phone,
+        select * from administrator
+        where phone = #{phone}
     </select>
 </mapper>
