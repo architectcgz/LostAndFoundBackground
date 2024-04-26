@@ -8,12 +8,18 @@ import java.io.Serializable;
 
 import java.util.Date;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.experimental.Accessors;
 import org.hibernate.validator.constraints.Length;
 
 /**
 * 
 * @TableName found_item
 */
+@Data
+@EqualsAndHashCode(callSuper = false)
+@Accessors(chain = true)
 public class FoundItem implements Serializable {
 
     /**
