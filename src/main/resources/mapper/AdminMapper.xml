@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.lostandfoundbackground.mapper.AdminMapper">
+
+    <insert id="createAdmin">
+        insert into administrator
+        (phone,name,password,level,create_time,update_time)
+        values(
+            #{admin.phone},
+            #{admin.name},
+            #{admin.password},
+            #{admin.level},
+            #{admin.createTime},
+            #{admin.updateTime}
+        )
+    </insert>
+    <select id="findAdminByPhone" resultType="com.example.lostandfoundbackground.entity.Administrator">
+        select id,name,phone,
+    </select>
+</mapper>
