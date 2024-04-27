@@ -1,8 +1,9 @@
 package com.example.lostandfoundbackground.utils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONObject;
 
 import java.util.List;
 
@@ -10,57 +11,53 @@ import java.util.List;
  * @author archi
  */
 public class JsonUtils {
-    //使用Jackson的ObjectMapper
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-    /**
-     * 将对象转换成json字符串。
-     *
-     * @param data
-     * @return
+
+    //使用FastJson2
+
+    /*
+     将String转化为JSONObject
      */
-    public static String objectToJson(Object data) {
+    public static JSONObject stringToJsonObj(String text){
         try {
-            String string = MAPPER.writeValueAsString(data);
-            return string;
-        } catch (JsonProcessingException e) {
+            return JSON.parseObject(text);
+        }catch (JSONException e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+    /*
+        将Json转化为Java对象
+     */
+    public static <T> T jsonToJavaBean(String text,Class<T>beanType){
+        try {
+            return JSON.parseObject(text,beanType);
+        }catch (JSONException e){
             e.printStackTrace();
         }
         return null;
     }
 
-    /**
-     * 将json结果集转化为对象
-     *
-     * @param jsonData
-     * @param beanType
-     * @return
+    /*
+        将Java对象序列化为Json
      */
-    public static <T> T jsonToPojo(String jsonData, Class<T> beanType) {
-
+    public static String javaBeanToJson(Object data){
         try {
-            return MAPPER.readValue(jsonData, beanType);
-        } catch (Exception e) {
+            return JSON.toJSONString(data);
+        }catch (JSONException e){
             e.printStackTrace();
         }
         return null;
     }
-
-    /**
-     * 将json数据转换成pojo对象list
-     *
-     * @param jsonData
-     * @param beanType
-     * @return
+    /*
+        将Json转化为BeanList
      */
-    public static <T> List<T> jsonToList(String jsonData, Class<T> beanType) {
-
-        JavaType javaType = MAPPER.getTypeFactory().constructParametricType(List.class, beanType);
+    public static <T> List<T> jsonToBeanList(String text, Class<T>beanType){
         try {
-            return MAPPER.readValue(jsonData, javaType);
-        } catch (Exception e) {
+            JSONArray array = JSON.parseArray(text);
+            return array.toJavaList(beanType);
+        }catch (JSONException e){
             e.printStackTrace();
         }
         return null;
     }
-
 }
