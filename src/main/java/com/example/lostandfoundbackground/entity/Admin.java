@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.hibernate.validator.constraints.Length;
 
@@ -19,12 +21,13 @@ import java.util.Date;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-public class Administrator implements Serializable {
+@Getter
+@Setter
+public class Admin implements Serializable {
 
     /**
     * 
     */
-    @NotNull(message="[]不能为空")
     @ApiModelProperty("管理员编号")
     private Integer id;
     /**

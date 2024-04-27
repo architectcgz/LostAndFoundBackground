@@ -1,14 +1,8 @@
 package com.example.lostandfoundbackground.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.ibatis.annotations.Update;
-
-import java.time.LocalDateTime;
 
 /**
  * @author archi
@@ -16,7 +10,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AdministratorDTO {
+public class AdminDTO {
     private Long id;
     private String name;
     private String phone;
