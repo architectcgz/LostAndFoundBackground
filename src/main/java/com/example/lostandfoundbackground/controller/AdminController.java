@@ -2,11 +2,10 @@ package com.example.lostandfoundbackground.controller;
 
 import com.example.lostandfoundbackground.dto.LoginFormDTO;
 import com.example.lostandfoundbackground.dto.Result;
+import com.example.lostandfoundbackground.entity.Admin;
 import com.example.lostandfoundbackground.service.AdminService;
 import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,7 +35,14 @@ public class AdminController {
 
     @PostMapping("/logout")
     Result logout(@RequestHeader("Authorization")String token){
-        log.info(token);
         return adminService.logout(token);
+    }
+    /*
+        添加新的管理员
+     */
+
+    @PostMapping("/add")
+    Result addAdmin(@RequestBody Admin admin){
+        return adminService.addAdmin(admin);
     }
 }

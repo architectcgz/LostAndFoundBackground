@@ -1,25 +1,23 @@
 package com.example.lostandfoundbackground.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.lang.UUID;
-import com.example.lostandfoundbackground.dto.AdministratorDTO;
+import com.example.lostandfoundbackground.dto.AdminDTO;
 import com.example.lostandfoundbackground.dto.LoginFormDTO;
 import com.example.lostandfoundbackground.dto.Result;
-import com.example.lostandfoundbackground.entity.Administrator;
+import com.example.lostandfoundbackground.entity.Admin;
 import com.example.lostandfoundbackground.mapper.AdminMapper;
 import com.example.lostandfoundbackground.service.AdminService;
-import com.example.lostandfoundbackground.utils.EncryptUtil;
-import com.example.lostandfoundbackground.utils.JsonUtils;
-import com.example.lostandfoundbackground.utils.RedisUtil;
-import com.example.lostandfoundbackground.utils.RegexUtils;
+import com.example.lostandfoundbackground.utils.*;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import static com.example.lostandfoundbackground.constants.RedisConstants.*;
+import static com.example.lostandfoundbackground.constants.RedisConstants.LOGIN_ADMIN_KEY;
+import static com.example.lostandfoundbackground.constants.RedisConstants.LOGIN_ADMIN_PHONE;
 
 /**
  * @author archi
@@ -45,13 +43,13 @@ public class AdminServiceImpl implements AdminService {
         //得到加密后的字符串
         String encryptedPwd = EncryptUtil.getMD5String(password);
         //从redis中尝试查询Admin，不存在再去MySql查询
-        Administrator admin = null;
+        Admin admin = null;
         String key = LOGIN_ADMIN_PHONE + phone;
         try {
             if(Boolean.TRUE.equals(stringRedisTemplate.hasKey(key))){
                 String jsonAdmin = stringRedisTemplate.opsForValue().get(key);
                 //将json反序列化为administrator类型
-                admin = JsonUtils.jsonToPojo(jsonAdmin, Administrator.class);
+                admin = JsonUtils.jsonToPojo(jsonAdmin, Admin.class);
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -81,7 +79,7 @@ public class AdminServiceImpl implements AdminService {
         //将Administrator转化为HashMap
         //这里只需要用到一些关键数据：id、phone、name,level,不需要使用createTime和updateTime
         //所以使用adminDTO接收
-        AdministratorDTO adminDTO = BeanUtil.copyProperties(admin,AdministratorDTO.class);
+        AdminDTO adminDTO = BeanUtil.copyProperties(admin, AdminDTO.class);
         //设置token有效期 一天失效
         RedisUtil.storeBeanAsHash(stringRedisTemplate,adminDTO,LOGIN_ADMIN_KEY + token,1440);
         //返回token
@@ -97,6 +95,37 @@ public class AdminServiceImpl implements AdminService {
             return Result.fail("用户未登录!");
         }
         stringRedisTemplate.delete(LOGIN_ADMIN_KEY+token);
+        return Result.ok();
+    }
+
+    @Override
+    public Result addAdmin(Admin admin) {
+        //从ThreadLocal中获取到当前的管理员
+        Thread t = Thread.currentThread();
+        log.info("取出ThreadLocal中的数据时当前线程:"+t.getName());
+        AdminDTO nowAdmin = ThreadLocalUtil.get();
+        if(nowAdmin == null){
+            return Result.fail("添加失败,请检查登录状态!");
+        }
+        //等级为100的为超级管理员，只有超级管理员能添加新的管理员
+        if(nowAdmin.getLevel()<100){
+            return Result.fail("管理员等级低,不允许添加新的管理员!");
+        }
+        String password = admin.getPassword();
+        String phone = admin.getPhone();
+        if(!(RegexUtils.isPhoneValid(phone)&&RegexUtils.isPasswordValid(password))){
+            //不符合手机号的格式，返回错误信息
+            log.info("手机号是否符合格式:"+ RegexUtils.isPhoneValid(phone));
+            log.info("密码是否符合格式"+ RegexUtils.isPasswordValid(password));
+            return Result.fail("手机号码或密码格式错误");
+        }
+
+        admin.setCreateTime(DateTime.now());
+        admin.setUpdateTime(DateTime.now());
+        //超级管理员添加的是普通管理员
+        admin.setLevel(1);
+        admin.setPassword(EncryptUtil.getMD5String(password));
+        adminMapper.addAdmin(admin);
         return Result.ok();
     }
 }

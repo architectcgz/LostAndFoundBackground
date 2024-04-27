@@ -1,11 +1,12 @@
 package com.example.lostandfoundbackground.mapper;
 
-import com.example.lostandfoundbackground.entity.Administrator;
+import com.example.lostandfoundbackground.entity.Admin;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface AdminMapper {
-    public Administrator findAdminBaseByPhone(String phone);
+    public Admin findAdminBaseByPhone(String phone);
 
-    public Administrator createAdmin(Administrator admin);
+    public void addAdmin(@Param("admin")Admin admin);
 }

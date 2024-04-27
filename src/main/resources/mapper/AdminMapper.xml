@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.lostandfoundbackground.mapper.AdminMapper">
 
-    <insert id="createAdmin">
+    <insert id="addAdmin">
         insert into administrator
         (phone,name,password,level,create_time,update_time)
         values(
@@ -16,9 +16,13 @@
             #{admin.updateTime}
         )
     </insert>
-    <select id="findAdminBaseByPhone" resultType="com.example.lostandfoundbackground.entity.Administrator">
+
+
+    <select id="findAdminBaseByPhone" resultType="com.example.lostandfoundbackground.entity.Admin">
         select id,name,password,phone,level
         from administrator
         where phone = #{phone}
     </select>
+
+
 </mapper>
