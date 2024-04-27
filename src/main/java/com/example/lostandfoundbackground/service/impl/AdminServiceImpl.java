@@ -1,7 +1,6 @@
 package com.example.lostandfoundbackground.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.lang.UUID;
 import com.example.lostandfoundbackground.dto.AdministratorDTO;
 import com.example.lostandfoundbackground.dto.LoginFormDTO;
@@ -10,20 +9,17 @@ import com.example.lostandfoundbackground.entity.Administrator;
 import com.example.lostandfoundbackground.mapper.AdminMapper;
 import com.example.lostandfoundbackground.service.AdminService;
 import com.example.lostandfoundbackground.utils.EncryptUtil;
+import com.example.lostandfoundbackground.utils.JsonUtils;
+import com.example.lostandfoundbackground.utils.RedisUtil;
 import com.example.lostandfoundbackground.utils.RegexUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
-import static com.example.lostandfoundbackground.constants.RedisConstants.LOGIN_ADMIN_KEY;
-import static com.example.lostandfoundbackground.constants.RedisConstants.LOGIN_ADMIN_TTL;
+import static com.example.lostandfoundbackground.constants.RedisConstants.*;
 
 /**
  * @author archi
@@ -31,13 +27,12 @@ import static com.example.lostandfoundbackground.constants.RedisConstants.LOGIN_
 @Service
 @Slf4j
 public class AdminServiceImpl implements AdminService {
-    private static final ObjectMapper MAPPER = new ObjectMapper();
     @Resource
     private StringRedisTemplate stringRedisTemplate;
     @Resource
     private AdminMapper adminMapper;
     @Override
-    public Result login(LoginFormDTO loginForm, HttpSession session) {
+    public Result login(LoginFormDTO loginForm) {
         //校验手机号和密码
         String phone = loginForm.getPhone();
         String password = loginForm.getPassword();
@@ -49,13 +44,14 @@ public class AdminServiceImpl implements AdminService {
         }
         //得到加密后的字符串
         String encryptedPwd = EncryptUtil.getMD5String(password);
-        //从redis中尝试查询用户，不存在再去MySql查询
+        //从redis中尝试查询Admin，不存在再去MySql查询
         Administrator admin = null;
+        String key = LOGIN_ADMIN_PHONE + phone;
         try {
-            if(stringRedisTemplate.hasKey("admin"+phone)){
-                String jsonAdmin = stringRedisTemplate.opsForValue().get("admin"+phone);
+            if(Boolean.TRUE.equals(stringRedisTemplate.hasKey(key))){
+                String jsonAdmin = stringRedisTemplate.opsForValue().get(key);
                 //将json反序列化为administrator类型
-                admin = MAPPER.readValue(jsonAdmin,Administrator.class);
+                admin = JsonUtils.jsonToPojo(jsonAdmin, Administrator.class);
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -63,11 +59,17 @@ public class AdminServiceImpl implements AdminService {
 
         //redis中查询不到,从mysql中查询
         if(admin == null){
-            admin = adminMapper.findAdminByPhone(phone);
+            admin = adminMapper.findAdminBaseByPhone(phone);
             if(admin == null){
                 return Result.fail("该管理员不存在");
             }
+            //mysql中查到的信息放到redis里，下次登录可以先从redis中查询
+            //设置3天失效3*24*60
+            RedisUtil.storeBeanAsJson(stringRedisTemplate,admin,LOGIN_ADMIN_PHONE + phone,4320);
         }
+
+
+
         //前端传来的加密后的密码与实际密码不同，密码错误
         if(!admin.getPassword().equals(encryptedPwd)){
             return Result.fail("密码错误,请重新输入");
@@ -77,18 +79,24 @@ public class AdminServiceImpl implements AdminService {
         String token = UUID.randomUUID().toString(true);
 
         //将Administrator转化为HashMap
+        //这里只需要用到一些关键数据：id、phone、name,level,不需要使用createTime和updateTime
+        //所以使用adminDTO接收
         AdministratorDTO adminDTO = BeanUtil.copyProperties(admin,AdministratorDTO.class);
-        Map<String,Object> adminMap = BeanUtil.beanToMap(adminDTO,new HashMap<>(),
-                CopyOptions.create()
-                        .setIgnoreNullValue(true)
-                        .setFieldValueEditor((fieldName,fieldValue)->fieldValue.toString()));
-
-        //将Administrator的token和administrator的信息转化为HashMap存放到redis中
-        String tokenKey = LOGIN_ADMIN_KEY + token;
-        stringRedisTemplate.opsForHash().putAll(tokenKey,adminMap);
-        //设置token有效期
-        stringRedisTemplate.expire(tokenKey,LOGIN_ADMIN_TTL, TimeUnit.MINUTES);
+        //设置token有效期 一天失效
+        RedisUtil.storeBeanAsHash(stringRedisTemplate,adminDTO,LOGIN_ADMIN_KEY + token,1440);
         //返回token
         return Result.ok(token);
+    }
+
+    /*
+        登出需要清除Redis中保存的token
+     */
+    @Override
+    public Result logout(String token) {
+        if(!StringUtils.hasLength(token)){
+            return Result.fail("用户未登录!");
+        }
+        stringRedisTemplate.delete(LOGIN_ADMIN_KEY+token);
+        return Result.ok();
     }
 }

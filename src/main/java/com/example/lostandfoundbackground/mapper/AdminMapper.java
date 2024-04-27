@@ -5,7 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface AdminMapper {
-    public Administrator findAdminByPhone(String phone);
+    public Administrator findAdminBaseByPhone(String phone);
 
     public Administrator createAdmin(Administrator admin);
 }

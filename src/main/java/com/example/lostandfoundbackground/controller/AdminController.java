@@ -5,16 +5,15 @@ import com.example.lostandfoundbackground.dto.Result;
 import com.example.lostandfoundbackground.service.AdminService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author archi
  */
+@Slf4j
 @RequestMapping("/admin")
 @RestController
 @Validated
@@ -31,7 +30,13 @@ public class AdminController {
         }
      */
     @PostMapping("/login")
-    Result login(@RequestBody LoginFormDTO loginForm, HttpSession session){
-        return adminService.login(loginForm,session);
+    Result login(@RequestBody LoginFormDTO loginForm){
+        return adminService.login(loginForm);
+    }
+
+    @PostMapping("/logout")
+    Result logout(@RequestHeader("Authorization")String token){
+        log.info(token);
+        return adminService.logout(token);
     }
 }

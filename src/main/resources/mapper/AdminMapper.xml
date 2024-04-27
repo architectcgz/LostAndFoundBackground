@@ -16,8 +16,9 @@
             #{admin.updateTime}
         )
     </insert>
-    <select id="findAdminByPhone" resultType="com.example.lostandfoundbackground.entity.Administrator">
-        select * from administrator
+    <select id="findAdminBaseByPhone" resultType="com.example.lostandfoundbackground.entity.Administrator">
+        select id,name,password,phone,level
+        from administrator
         where phone = #{phone}
     </select>
 </mapper>

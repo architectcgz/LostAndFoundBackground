@@ -17,15 +17,19 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AdministratorDTO {
-    @NotEmpty(groups = Update.class,message = "id不能为空")
     private Long id;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime createTime;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime updateTime;
     private String name;
-    @JsonIgnore
-    private String password;
     private String phone;
+    private Integer level;
+//    @NotEmpty(groups = Update.class,message = "id不能为空")
+//    private Long id;
+//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+//    private LocalDateTime createTime;
+//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+//    private LocalDateTime updateTime;
+//    private String name;
+//    @JsonIgnore
+//    private String password;
+//    private String phone;
 
 }
