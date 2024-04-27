@@ -20,21 +20,27 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserDTO {
-    @NotNull(groups = Update.class,message = "id不能为空")
+
     private Long id;
-    @JsonIgnore//Json转换时忽略password这个属性
-    private String password;
-
-    @NotEmpty
-    @Pattern(regexp = "^\\S{1,10}$")
+    private String phone;
     private String name;
-
-    @NotEmpty
-    @URL
     private String avatar;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime createTime;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime updateTime;
+//    @NotNull(groups = Update.class,message = "id不能为空")
+//    private Long id;
+//    @JsonIgnore//Json转换时忽略password这个属性
+//    private String password;
+//
+//    @NotEmpty
+//    @Pattern(regexp = "^\\S{1,10}$")
+//    private String name;
+//
+//    @NotEmpty
+//    @URL
+//    private String avatar;
+
+//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+//    private LocalDateTime createTime;
+//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+//    private LocalDateTime updateTime;
 }

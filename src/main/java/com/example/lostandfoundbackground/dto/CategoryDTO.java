@@ -16,13 +16,17 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CategoryDTO {
-    @NotEmpty(groups = Update.class,message = "id不能为空")
     private Long id;
     private String categoryName;
     private String categoryAlias;
     private Long createUser;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime createTime;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime updateTime;
+//    @NotEmpty(groups = Update.class,message = "id不能为空")
+//    private Long id;
+//    private String categoryName;
+//    private String categoryAlias;
+//    private Long createUser;
+//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+//    private LocalDateTime createTime;
+//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+//    private LocalDateTime updateTime;
 }
