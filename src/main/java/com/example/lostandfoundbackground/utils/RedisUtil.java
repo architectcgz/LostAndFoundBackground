@@ -13,12 +13,12 @@ import java.util.concurrent.TimeUnit;
 public class RedisUtil {
 
     /**
-     * Converts a Java Bean object to a Map and stores it in Redis.
-     * The field values are converted to strings, and null values are excluded.
+     * 将JavaBean转化为Map,然后将其保存到redis中
+     * 实体类中的非控制都被转化为String,null值忽略不转化
      *
-     * @param bean       The Java Bean object to convert.
-     * @param redisKey   The Redis key where the Map will be stored.
-     * @param redisTTL   The time-to-live (TTL) for the Redis key (in minutes).
+     * @param bean       要转化的bean
+     * @param redisKey   要保存到的redis key
+     * @param redisTTL   这个redis key的保存时间
      */
     public static void storeBeanAsHash(StringRedisTemplate stringRedisTemplate, Object bean, String redisKey, long redisTTL) {
 
@@ -37,7 +37,7 @@ public class RedisUtil {
     }
 
     public static void storeBeanAsJson(StringRedisTemplate stringRedisTemplate, Object bean, String redisKey, long redisTTL) {
-        String jsonValue = JsonUtils.objectToJson(bean);
+        String jsonValue = JsonUtils.javaBeanToJson(bean);
         log.info(jsonValue);
         if (jsonValue != null) {
             stringRedisTemplate.opsForValue().set(redisKey,jsonValue);
