@@ -23,13 +23,13 @@ public class AliYunSmsUtil {
         发送短信的代码
         返回值表示发送成功与否
      */
-    public static Boolean sendSms(String phoneNumber,String code) throws Exception {
-        com.aliyun.dysmsapi20170525.Client client = AliYunSmsUtil.createClient();
+    public static void sendSms(String phoneNumber, String code) throws Exception {
+        com.aliyun.dysmsapi20170525.Client client = createClient();
         com.aliyun.dysmsapi20170525.models.SendSmsRequest sendSmsRequest = new com.aliyun.dysmsapi20170525.models.SendSmsRequest()
-                .setSignName("验证码短信")
-                .setTemplateCode("SMS_298005724")
+                .setSignName("CALLAF")
+                .setTemplateCode("SMS_465900374")
                 .setPhoneNumbers(phoneNumber)
-                .setTemplateParam("{\"code\":\""+code +"\"}");
+                .setTemplateParam("{\"code\":\"%s\"}".formatted(code));
         com.aliyun.teautil.models.RuntimeOptions runtime = new com.aliyun.teautil.models.RuntimeOptions();
         try {
             //发送验证码
@@ -40,7 +40,6 @@ public class AliYunSmsUtil {
             // 诊断地址
             System.out.println(error.getData().get("Recommend"));
             com.aliyun.teautil.Common.assertAsString(error.message);
-            return false;
         } catch (Exception _error) {
             TeaException error = new TeaException(_error.getMessage(), _error);
             // 打印出错误 message
@@ -48,8 +47,6 @@ public class AliYunSmsUtil {
             // 诊断地址
             System.out.println(error.getData().get("Recommend"));
             com.aliyun.teautil.Common.assertAsString(error.message);
-            return false;
         }
-        return true;
     }
 }
