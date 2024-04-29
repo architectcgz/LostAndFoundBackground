@@ -35,8 +35,8 @@ public class RefreshTokenInterceptor implements HandlerInterceptor {
         //1.获取请求头中的token
         String token = request.getHeader("Authorization");
         log.info("token"+token);
-        //admin或user没有token时放行，也就是token长度为0时放行,使其可以登录获取token
-        if(!StringUtils.hasLength(token)){
+        //admin或user没有token时放行,使其可以登录获取token
+        if(token == null){
             return true;
         }
         //基于token获取redis中的user
@@ -62,7 +62,7 @@ public class RefreshTokenInterceptor implements HandlerInterceptor {
     }
 
     private Object createDtoByUserType(Map<Object,Object> userMap){
-        //1表示用户
+        //1表示用户，2表示管理员
         if(this.userType==1){
             return BeanUtil.fillBeanWithMap(userMap,new UserDTO(),false);
         } else if (this.userType == 2) {
