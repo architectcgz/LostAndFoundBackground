@@ -16,6 +16,11 @@
             #{admin.updateTime}
         )
     </insert>
+    <update id="changePwd">
+        update administrator
+        set password = #{newPwd}
+        where id = #{id}
+    </update>
 
 
     <select id="findAdminBaseByPhone" resultType="com.example.lostandfoundbackground.entity.Admin">

@@ -9,4 +9,7 @@ public interface AdminMapper {
     public Admin findAdminBaseByPhone(String phone);
 
     public void addAdmin(@Param("admin")Admin admin);
+
+    public void changePwd(Long id,String newPwd);
+
 }
