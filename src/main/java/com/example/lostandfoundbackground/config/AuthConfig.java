@@ -1,5 +1,6 @@
 package com.example.lostandfoundbackground.config;
 
+import com.example.lostandfoundbackground.Interceptors.AdminLoginInterceptor;
 import com.example.lostandfoundbackground.Interceptors.RefreshTokenInterceptor;
 import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +24,9 @@ public class AuthConfig implements WebMvcConfigurer {
         //Admin token刷新的拦截器
         registry.addInterceptor(new RefreshTokenInterceptor(stringRedisTemplate,LOGIN_ADMIN_KEY,LOGIN_ADMIN_TTL, (byte) 2))
                 .addPathPatterns("/**").order(0);
+
+        registry.addInterceptor(new AdminLoginInterceptor())
+                .excludePathPatterns("/admin/login").order(1);
         //User token刷新的拦截器
 //        registry.addInterceptor(new RefreshTokenInterceptor(stringRedisTemplate,LOGIN_USER_KEY,LOGIN_USER_TTL, (byte) 1))
 //                .addPathPatterns("/user/**").order(0);
