@@ -17,7 +17,8 @@ import org.hibernate.validator.constraints.Length;
 
 /**
 * 
-* @TableName found_item
+* @author archi
+ * @TableName found_item
 */
 @Data
 @Getter

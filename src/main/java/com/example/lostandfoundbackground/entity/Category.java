@@ -17,7 +17,8 @@ import org.hibernate.validator.constraints.Length;
 
 /**
 * 分类表
-* @TableName category
+* @author archi
+ * @TableName category
 */
 @Data
 @Getter

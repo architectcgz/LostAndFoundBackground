@@ -1,5 +1,6 @@
 package com.example.lostandfoundbackground.dto;
 
+import com.example.lostandfoundbackground.constants.HttpStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,15 +20,16 @@ public class Result {
     private Long total;
 
     public static Result ok(){
-        return new Result(0, "操作成功", null, null);
+        return new Result(HttpStatus.SUCCESS, "操作成功", null, null);
     }
     public static Result ok(Object data){
-        return new Result(0, "操作成功", data, null);
+        return new Result(HttpStatus.SUCCESS, "操作成功", data, null);
     }
     public static Result ok(List<?> data, Long total){
-        return new Result(0, "操作成功", data, total);
+        return new Result(HttpStatus.SUCCESS, "操作成功", data, total);
     }
-    public static Result fail(String errorMsg){
+    public static Result error(int code,String errorMsg){
         return new Result(1, errorMsg, null, null);
     }
+
 }

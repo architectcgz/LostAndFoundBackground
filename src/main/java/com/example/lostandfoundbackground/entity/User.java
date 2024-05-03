@@ -10,14 +10,19 @@ import java.util.Date;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.hibernate.validator.constraints.Length;
 
 /**
 * 
-* @TableName user
+* @author archi
+ * @TableName user
 */
 @Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 public class User implements Serializable {
@@ -27,7 +32,7 @@ public class User implements Serializable {
     */
     @NotNull(message="[]不能为空")
     @ApiModelProperty("")
-    private Integer id;
+    private Long id;
     /**
     * 创建时间
     */
