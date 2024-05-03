@@ -62,6 +62,9 @@ public class AdminServiceImpl implements AdminService {
             if(admin == null){
                 return Result.error(1,"该管理员不存在");
             }
+            if(admin.getStatus()==-1){
+                return Result.error(1,"该管理员已被禁用");
+            }
             //mysql中查到的信息放到redis里，下次登录可以先从redis中查询
             //设置3天失效3*24*60
             RedisUtils.storeBeanAsJson(admin,LOGIN_ADMIN_PHONE + phone,4320);
