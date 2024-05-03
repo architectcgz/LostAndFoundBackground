@@ -21,6 +21,15 @@
         set password = #{newPwd}
         where id = #{id}
     </update>
+    <update id="banAdminById">
+        update administrator
+        set status = -1
+        where id = #{id}
+    </update>
+    <delete id="deleteAdminById">
+        delete from administrator
+        where id = #{id}
+    </delete>
 
 
     <select id="findAdminBaseByPhone" resultType="com.example.lostandfoundbackground.entity.Admin">

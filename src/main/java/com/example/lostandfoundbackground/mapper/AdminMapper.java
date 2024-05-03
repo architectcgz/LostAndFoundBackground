@@ -10,6 +10,9 @@ public interface AdminMapper {
 
     public void addAdmin(@Param("admin")Admin admin);
 
+    public void deleteAdminById(Long id);
+
     public void changePwd(Long id,String newPwd);
 
+    public void banAdminById(Long id);
 }

@@ -5,10 +5,7 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.RandomUtil;
 import com.example.lostandfoundbackground.constants.HttpStatus;
-import com.example.lostandfoundbackground.dto.AdminDTO;
-import com.example.lostandfoundbackground.dto.ChangePwdDTO;
-import com.example.lostandfoundbackground.dto.LoginFormDTO;
-import com.example.lostandfoundbackground.dto.Result;
+import com.example.lostandfoundbackground.dto.*;
 import com.example.lostandfoundbackground.entity.Admin;
 import com.example.lostandfoundbackground.mapper.AdminMapper;
 import com.example.lostandfoundbackground.service.AdminService;
@@ -116,7 +113,7 @@ public class AdminServiceImpl implements AdminService {
         }
         //等级为100的为超级管理员，只有超级管理员能添加新的管理员
         if(nowAdmin.getLevel()<100){
-            return Result.error(1,"管理员等级低,不允许添加新的管理员!");
+            return Result.error(1,"管理员权限不足,不允许添加新的管理员!");
         }
         String password = admin.getPassword();
         String phone = admin.getPhone();
@@ -133,6 +130,28 @@ public class AdminServiceImpl implements AdminService {
         admin.setLevel(1);
         admin.setPassword(EncryptUtil.getMD5String(password));
         adminMapper.addAdmin(admin);
+        return Result.ok();
+    }
+
+    @Override
+    public Result banAdmin(Long id) {
+        //从ThreadLocal中获取到当前的管理员
+        AdminDTO nowAdmin = ThreadLocalUtil.get();
+        if(nowAdmin.getLevel()<100){
+            return Result.error(1,"管理员权限不足,不允许禁用其他管理员!");
+        }
+        adminMapper.banAdminById(id);
+        return Result.ok();
+    }
+
+    @Override
+    public Result deleteAdmin(Long id) {
+        //从ThreadLocal中获取到当前的管理员
+        AdminDTO nowAdmin = ThreadLocalUtil.get();
+        if(nowAdmin.getLevel()<100){
+            return Result.error(1,"管理员权限不足,不允许删除其他管理员!");
+        }
+        adminMapper.deleteAdminById(id);
         return Result.ok();
     }
 
@@ -183,11 +202,18 @@ public class AdminServiceImpl implements AdminService {
         //先修改密码，然后将当前登录的管理员登出
         String newPwd = EncryptUtil.getMD5String(changePwdDTO.getRepeatPwd());
         adminMapper.changePwd(nowAdmin.getId(),newPwd);
+        //从redis中删除token
         RedisUtils.del(LOGIN_ADMIN_KEY+token);
+        return Result.ok();
+    }
 
+    @Override
+    public Result addNews(NewsDTO newsDTO) {
 
         return Result.ok();
     }
+
+
 
 
 }

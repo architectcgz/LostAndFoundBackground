@@ -2,6 +2,7 @@ package com.example.lostandfoundbackground.controller;
 
 import com.example.lostandfoundbackground.dto.ChangePwdDTO;
 import com.example.lostandfoundbackground.dto.LoginFormDTO;
+import com.example.lostandfoundbackground.dto.NewsDTO;
 import com.example.lostandfoundbackground.dto.Result;
 import com.example.lostandfoundbackground.entity.Admin;
 import com.example.lostandfoundbackground.service.AdminService;
@@ -39,6 +40,16 @@ public class AdminController {
         return adminService.addAdmin(admin);
     }
 
+    @PostMapping("/delete")
+    Result deleteAdmin(@RequestParam("id")Long id ){
+        return adminService.deleteAdmin(id);
+    }
+
+    @PostMapping("/ban")
+    Result banAdmin(@RequestParam("id")Long id){
+        return adminService.banAdmin(id);
+    }
+
     @PostMapping("/code")
     Result sendSmsCode(){
         return adminService.sendSmsCode();
@@ -54,4 +65,10 @@ public class AdminController {
     Result changePwd(@RequestHeader("Authorization")String token,@RequestBody ChangePwdDTO changePwdDTO){
         return adminService.changePwd(token,changePwdDTO);
     }
+
+    @PostMapping("/news/publish")
+    Result addNews(@RequestBody NewsDTO newsDTO){
+        return adminService.addNews(newsDTO);
+    }
+
 }
