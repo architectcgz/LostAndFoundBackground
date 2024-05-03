@@ -17,7 +17,7 @@ public interface AdminService {
     public Result addAdmin(Admin admin);
     public Result sendSmsCode();
 
-    public Result validateSmsCode(String phone,String code);
+    public Result validateSmsCode(String code);
 
     public Result changePwd(String token,ChangePwdDTO changePwdDTO);
 }

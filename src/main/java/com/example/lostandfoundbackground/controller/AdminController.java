@@ -55,8 +55,8 @@ public class AdminController {
 
     @PostMapping("/validateSmsCode")
     @ApiOperation("验证短信code是否正确")
-    public Result validateSmsCode(@RequestParam("phone")String phone,@RequestParam("code")String code){
-        return adminService.validateSmsCode(phone, code);
+    public Result validateSmsCode(@RequestParam("code")String code){
+        return adminService.validateSmsCode(code);
     }
 
     @PostMapping("/changePwd")
