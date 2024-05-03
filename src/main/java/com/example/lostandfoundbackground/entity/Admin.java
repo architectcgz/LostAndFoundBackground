@@ -69,4 +69,9 @@ public class Admin implements Serializable {
     @ApiModelProperty("管理员的等级")
     private Integer level;
 
+    /**
+     * 管理员的状态,0表示正常使用,1表示已被禁用
+     */
+    @ApiModelProperty("用户的状态")
+    private Integer status;
 }
