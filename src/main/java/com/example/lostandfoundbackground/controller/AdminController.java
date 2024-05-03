@@ -21,15 +21,6 @@ import org.springframework.web.bind.annotation.*;
 public class AdminController {
     @Resource
     private AdminService adminService;
-
-    //这里前端要传递Json数据
-    /*
-    下面的数据只用于演示，不正确
-        {
-            "phone": "112624",
-            "password": "asd"
-        }
-     */
     @PostMapping("/login")
     Result login(@RequestBody LoginFormDTO loginForm){
         return adminService.login(loginForm);

@@ -144,7 +144,7 @@ public class AdminServiceImpl implements AdminService {
         //发送验证码
         String smsCode = RandomUtil.randomNumbers(6);
         try {
-            //AliYunSmsUtil.sendSms(phone,smsCode);
+            AliYunSmsUtil.sendSms(phone,smsCode);
             log.info("验证码:"+smsCode+"\t发送到手机号:"+phone);
         }catch (Exception e){
             log.info(e.getMessage());
