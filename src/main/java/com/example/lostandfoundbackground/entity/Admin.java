@@ -29,7 +29,7 @@ public class Admin implements Serializable {
     * 
     */
     @ApiModelProperty("管理员编号")
-    private Integer id;
+    private Long id;
     /**
     * 创建时间
     */

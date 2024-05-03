@@ -10,6 +10,8 @@ import java.util.Date;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.hibernate.validator.constraints.Length;
 
@@ -18,6 +20,8 @@ import org.hibernate.validator.constraints.Length;
 * @TableName category
 */
 @Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 public class Category implements Serializable {
@@ -59,90 +63,5 @@ public class Category implements Serializable {
     @NotNull(message="[更新时间]不能为空")
     @ApiModelProperty("更新时间")
     private Date updateTime;
-
-    /**
-    * 
-    */
-    private void setCategoryId(Integer categoryId){
-    this.categoryId = categoryId;
-    }
-
-    /**
-    * 类别的名称
-    */
-    private void setCategoryName(String categoryName){
-    this.categoryName = categoryName;
-    }
-
-    /**
-    * 类别的别名
-    */
-    private void setCategoryAlias(String categoryAlias){
-    this.categoryAlias = categoryAlias;
-    }
-
-    /**
-    * 创建用户的id
-    */
-    private void setCreateUser(Integer createUser){
-    this.createUser = createUser;
-    }
-
-    /**
-    * 创建时间
-    */
-    private void setCreateTime(Date createTime){
-    this.createTime = createTime;
-    }
-
-    /**
-    * 更新时间
-    */
-    private void setUpdateTime(Date updateTime){
-    this.updateTime = updateTime;
-    }
-
-
-    /**
-    * 
-    */
-    private Integer getCategoryId(){
-    return this.categoryId;
-    }
-
-    /**
-    * 类别的名称
-    */
-    private String getCategoryName(){
-    return this.categoryName;
-    }
-
-    /**
-    * 类别的别名
-    */
-    private String getCategoryAlias(){
-    return this.categoryAlias;
-    }
-
-    /**
-    * 创建用户的id
-    */
-    private Integer getCreateUser(){
-    return this.createUser;
-    }
-
-    /**
-    * 创建时间
-    */
-    private Date getCreateTime(){
-    return this.createTime;
-    }
-
-    /**
-    * 更新时间
-    */
-    private Date getUpdateTime(){
-    return this.updateTime;
-    }
 
 }

@@ -10,6 +10,8 @@ import java.util.Date;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.hibernate.validator.constraints.Length;
 
@@ -18,6 +20,8 @@ import org.hibernate.validator.constraints.Length;
 * @TableName found_item
 */
 @Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 public class FoundItem implements Serializable {
@@ -102,188 +106,5 @@ public class FoundItem implements Serializable {
     */
     @ApiModelProperty("创建这条招领信息的用户id")
     private Integer createUser;
-
-    /**
-    * 
-    */
-    private void setId(Integer id){
-    this.id = id;
-    }
-
-    /**
-    * 创建时间
-    */
-    private void setCreateTime(Date createTime){
-    this.createTime = createTime;
-    }
-
-    /**
-    * 更新时间
-    */
-    private void setUpdateTime(Date updateTime){
-    this.updateTime = updateTime;
-    }
-
-    /**
-    * 物品名称
-    */
-    private void setName(String name){
-    this.name = name;
-    }
-
-    /**
-    * 是否已经认领
-    */
-    private void setClaimed(Integer claimed){
-    this.claimed = claimed;
-    }
-
-    /**
-    * 物品图片
-    */
-    private void setImage(String image){
-    this.image = image;
-    }
-
-    /**
-    * 物品类别
-    */
-    private void setCategoryId(Integer categoryId){
-    this.categoryId = categoryId;
-    }
-
-    /**
-    * 发现地点
-    */
-    private void setFoundLocation(String foundLocation){
-    this.foundLocation = foundLocation;
-    }
-
-    /**
-    * 发现时间
-    */
-    private void setFoundTime(Date foundTime){
-    this.foundTime = foundTime;
-    }
-
-    /**
-    * 详细描述
-    */
-    private void setDescription(String description){
-    this.description = description;
-    }
-
-    /**
-    * 姓名
-    */
-    private void setOwnerName(String ownerName){
-    this.ownerName = ownerName;
-    }
-
-    /**
-    * 手机号码
-    */
-    private void setPhone(String phone){
-    this.phone = phone;
-    }
-
-    /**
-    * 创建这条招领信息的用户id
-    */
-    private void setCreateUser(Integer createUser){
-    this.createUser = createUser;
-    }
-
-
-    /**
-    * 
-    */
-    private Integer getId(){
-    return this.id;
-    }
-
-    /**
-    * 创建时间
-    */
-    private Date getCreateTime(){
-    return this.createTime;
-    }
-
-    /**
-    * 更新时间
-    */
-    private Date getUpdateTime(){
-    return this.updateTime;
-    }
-
-    /**
-    * 物品名称
-    */
-    private String getName(){
-    return this.name;
-    }
-
-    /**
-    * 是否已经认领
-    */
-    private Integer getClaimed(){
-    return this.claimed;
-    }
-
-    /**
-    * 物品图片
-    */
-    private String getImage(){
-    return this.image;
-    }
-
-    /**
-    * 物品类别
-    */
-    private Integer getCategoryId(){
-    return this.categoryId;
-    }
-
-    /**
-    * 发现地点
-    */
-    private String getFoundLocation(){
-    return this.foundLocation;
-    }
-
-    /**
-    * 发现时间
-    */
-    private Date getFoundTime(){
-    return this.foundTime;
-    }
-
-    /**
-    * 详细描述
-    */
-    private String getDescription(){
-    return this.description;
-    }
-
-    /**
-    * 姓名
-    */
-    private String getOwnerName(){
-    return this.ownerName;
-    }
-
-    /**
-    * 手机号码
-    */
-    private String getPhone(){
-    return this.phone;
-    }
-
-    /**
-    * 创建这条招领信息的用户id
-    */
-    private Integer getCreateUser(){
-    return this.createUser;
-    }
 
 }
