@@ -19,13 +19,14 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDTO {
-
+public class UserDTO{
     private Long id;
     private String phone;
     private String name;
-    private String avatar;
 
+    //用于判断admin或者user是否具有修改密码的权限
+    private Boolean allowModifyPwd = false;
+    private String avatar;
 //    @NotNull(groups = Update.class,message = "id不能为空")
 //    private Long id;
 //    @JsonIgnore//Json转换时忽略password这个属性

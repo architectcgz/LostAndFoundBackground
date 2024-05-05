@@ -163,7 +163,7 @@ public class AdminServiceImpl implements AdminService {
         //发送验证码
         String smsCode = RandomUtil.randomNumbers(6);
         try {
-            AliYunSmsUtil.sendSms(phone,smsCode);
+            //AliYunSmsUtil.sendSms(phone,smsCode);
             log.info("验证码:"+smsCode+"\t发送到手机号:"+phone);
         }catch (Exception e){
             log.info(e.getMessage());
@@ -188,6 +188,7 @@ public class AdminServiceImpl implements AdminService {
         if (codeInRedis == null || !codeInRedis.equals(code)) {
             return Result.error(1,"输入的验证码错误或已过期");
         }
+        nowAdmin.setAllowModifyPwd(true);
         return Result.ok("验证码验证成功");
     }
 
@@ -204,6 +205,9 @@ public class AdminServiceImpl implements AdminService {
         adminMapper.changePwd(nowAdmin.getId(),newPwd);
         //从redis中删除token
         RedisUtils.del(LOGIN_ADMIN_KEY+token);
+        //修改密码后重新设置成不允许修改密码
+        //再次验证验证码正确后再允许修改密码
+        nowAdmin.setAllowModifyPwd(false);
         return Result.ok();
     }
 

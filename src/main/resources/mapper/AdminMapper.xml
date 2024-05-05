@@ -33,7 +33,7 @@
 
 
     <select id="findAdminBaseByPhone" resultType="com.example.lostandfoundbackground.entity.Admin">
-        select id,name,password,phone,level
+        select id,name,password,phone,level,status
         from administrator
         where phone = #{phone}
     </select>

@@ -10,10 +10,13 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AdminDTO {
+public class AdminDTO{
     private Long id;
-    private String name;
     private String phone;
+    private String name;
+
+    //用于判断admin或者user是否具有修改密码的权限
+    private Boolean allowModifyPwd = false;
     private Integer level;
 //    @NotEmpty(groups = Update.class,message = "id不能为空")
 //    private Long id;
