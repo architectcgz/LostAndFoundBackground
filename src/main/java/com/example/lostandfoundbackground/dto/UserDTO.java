@@ -24,9 +24,13 @@ public class UserDTO{
     private String phone;
     private String name;
 
-    //用于判断admin或者user是否具有修改密码的权限
-    private Boolean allowModifyPwd = false;
     private String avatar;
+
+    @Override
+    public String toString(){
+        return "用户"+id+"\n姓名:"+name+"\n电话:"+phone;
+    }
+
 //    @NotNull(groups = Update.class,message = "id不能为空")
 //    private Long id;
 //    @JsonIgnore//Json转换时忽略password这个属性
