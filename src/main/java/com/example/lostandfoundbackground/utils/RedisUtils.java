@@ -2,8 +2,6 @@ package com.example.lostandfoundbackground.utils;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -319,7 +317,7 @@ public class RedisUtils {
     }
 
     public static void storeBeanAsJson(Object bean, String redisKey, long redisTTL) {
-        String jsonValue = JsonUtils.javaBeanToJson(bean);
+        String jsonValue = JsonUtils.javaBeanToJsonString(bean);
         log.info(jsonValue);
         if (jsonValue != null) {
             SPRING_REDIS_TEMPLATE.opsForValue().set(redisKey,jsonValue);
