@@ -13,6 +13,8 @@ import static com.example.lostandfoundbackground.constants.RedisConstants.*;
  */
 @Configuration
 public class AuthConfig implements WebMvcConfigurer {
+
+    //不需要登录也能访问的地址
     private final String []WHITE_LIST = {
             "/admin/login",
             "/user/login"
