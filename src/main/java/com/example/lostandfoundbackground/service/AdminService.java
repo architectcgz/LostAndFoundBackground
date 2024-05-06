@@ -17,9 +17,9 @@ public interface AdminService {
     public Result deleteAdmin(Long id);
     public Result sendSmsCode();
 
-    public Result validateSmsCode(String code);
+    public Result validateSmsCode(String code,String token);
 
-    public Result changePwd(String token,ChangePwdDTO changePwdDTO);
+    public Result modifyPwd(String token, ChangePwdDTO changePwdDTO);
 
     public Result addNews(NewsDTO newsDTO);
 

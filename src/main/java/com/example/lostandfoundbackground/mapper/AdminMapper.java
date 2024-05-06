@@ -4,6 +4,10 @@ import com.example.lostandfoundbackground.entity.Admin;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+
+/**
+ * @author archi
+ */
 @Mapper
 public interface AdminMapper {
     public Admin findAdminBaseByPhone(String phone);
@@ -14,5 +18,8 @@ public interface AdminMapper {
 
     public void changePwd(Long id,String newPwd);
 
+    public String getPwd(Long id);
+
     public void banAdminById(Long id);
+
 }

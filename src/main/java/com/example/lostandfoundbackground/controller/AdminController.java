@@ -57,13 +57,13 @@ public class AdminController {
 
     @PostMapping("/validateSmsCode")
     @ApiOperation("验证短信code是否正确")
-    public Result validateSmsCode(@RequestParam("code")String code){
-        return adminService.validateSmsCode(code);
+    public Result validateSmsCode(@RequestParam("code")String code,@RequestHeader("Authorization")String token){
+        return adminService.validateSmsCode(code,token);
     }
 
-    @PostMapping("/changePwd")
-    Result changePwd(@RequestHeader("Authorization")String token,@RequestBody ChangePwdDTO changePwdDTO){
-        return adminService.changePwd(token,changePwdDTO);
+    @PostMapping("/modifyPwd")
+    Result modifyPwd(@RequestHeader("Authorization")String token, @RequestBody ChangePwdDTO changePwdDTO){
+        return adminService.modifyPwd(token,changePwdDTO);
     }
 
     @PostMapping("/news/publish")

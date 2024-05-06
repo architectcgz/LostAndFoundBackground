@@ -97,10 +97,6 @@ public class AdminServiceImpl implements AdminService {
         return Result.ok();
     }
 
-
-
-
-
     @Override
     public Result addAdmin(Admin admin) {
         //从ThreadLocal中获取到当前的管理员
@@ -175,7 +171,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Result validateSmsCode(String code) {
+    public Result validateSmsCode(String code,String token) {
         //从ThreadLocal中获取到当前的管理员
         AdminDTO nowAdmin = ThreadLocalUtil.get();
         String phone = nowAdmin.getPhone();
@@ -188,26 +184,39 @@ public class AdminServiceImpl implements AdminService {
         if (codeInRedis == null || !codeInRedis.equals(code)) {
             return Result.error(1,"输入的验证码错误或已过期");
         }
-        nowAdmin.setAllowModifyPwd(true);
+        //校验过后,删除这次的验证码
+        RedisUtils.del(SMS_CODE_KEY+phone);
+        //验证码校验成功后，修改密码的接口开放10min，保证安全性
+        RedisUtils.set(ADMIN_VERIFICATION_STATUS+phone,"true",10);
+        log.info("校验验证码的线程:"+Thread.currentThread().getName());
         return Result.ok("验证码验证成功");
     }
 
     @Override
-    public Result changePwd(String token,ChangePwdDTO changePwdDTO) {
+    public Result modifyPwd(String token, ChangePwdDTO changePwdDTO) {
+        //从ThreadLocal中获取到当前的管理员
+        log.info("修改密码的线程:"+Thread.currentThread().getName());
+        AdminDTO nowAdmin = ThreadLocalUtil.get();
 
         if(!changePwdDTO.getNewPwd().equals(changePwdDTO.getRepeatPwd())){
             return Result.error(1,"两次输入的密码不相同,请检查");
         }
-        //从ThreadLocal中获取到当前的管理员
-        AdminDTO nowAdmin = ThreadLocalUtil.get();
-        //先修改密码，然后将当前登录的管理员登出
+
+        //先尝试修改密码，然后将当前Redis中存放的管理员信息删除(包括token和登录信息)
         String newPwd = EncryptUtil.getMD5String(changePwdDTO.getRepeatPwd());
+        //对比新密码与旧密码是否相同，如果相同，那么不修改，减少数据库操作
+        String oldPwd = adminMapper.getPwd(nowAdmin.getId());
+        if(newPwd.equals(oldPwd)){
+            return Result.error(1,"新密码与旧密码相同!");
+        }
+        //新旧密码不相同再修改
         adminMapper.changePwd(nowAdmin.getId(),newPwd);
-        //从redis中删除token
+        //从redis中删除token和登录信息
         RedisUtils.del(LOGIN_ADMIN_KEY+token);
-        //修改密码后重新设置成不允许修改密码
+        RedisUtils.del(LOGIN_ADMIN_PHONE+nowAdmin.getPhone());
+        //修改密码后重新设置成不允许修改密码,所以删除redis中是否允许修改密码的标记
         //再次验证验证码正确后再允许修改密码
-        nowAdmin.setAllowModifyPwd(false);
+        RedisUtils.del(ADMIN_VERIFICATION_STATUS+nowAdmin.getPhone());
         return Result.ok();
     }
 

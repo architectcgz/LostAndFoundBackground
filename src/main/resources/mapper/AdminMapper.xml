@@ -18,14 +18,16 @@
     </insert>
     <update id="changePwd">
         update administrator
-        set password = #{newPwd}
+        set password = #{newPwd}, update_time = NOW()
         where id = #{id}
     </update>
+
     <update id="banAdminById">
         update administrator
-        set status = -1
+        set status = -1, update_time = NOW()
         where id = #{id}
     </update>
+
     <delete id="deleteAdminById">
         delete from administrator
         where id = #{id}
@@ -36,6 +38,12 @@
         select id,name,password,phone,level,status
         from administrator
         where phone = #{phone}
+    </select>
+
+    <select id="getPwd" resultType="java.lang.String">
+        select password
+        from administrator
+        where id = #{id}
     </select>
 
 
