@@ -13,6 +13,14 @@ import java.util.List;
 public class JsonUtils {
 
     //使用FastJson2
+    public static String objToJsonString(Object o){
+        try {
+            return JSON.toJSONString(0);
+        }catch (JSONException e){
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     /*
      将String转化为JSONObject
@@ -40,7 +48,7 @@ public class JsonUtils {
     /*
         将Java对象序列化为Json
      */
-    public static String javaBeanToJson(Object data){
+    public static String javaBeanToJsonString(Object data){
         try {
             return JSON.toJSONString(data);
         }catch (JSONException e){
