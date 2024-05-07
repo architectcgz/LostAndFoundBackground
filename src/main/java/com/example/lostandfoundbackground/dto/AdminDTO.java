@@ -15,11 +15,11 @@ public class AdminDTO{
     private Long id;
     private String phone;
     private String name;
-
+    private String password;
     private Integer level;
     @Override
     public String toString(){
-        return "管理员"+id+"\n姓名:"+name+"\n电话:"+phone+"\n等级:"+level;
+        return "管理员"+id+"\n姓名:"+name+"\n电话:"+phone+"\n密码:"+password+"\n等级:"+level;
     }
 //    @NotEmpty(groups = Update.class,message = "id不能为空")
 //    private Long id;

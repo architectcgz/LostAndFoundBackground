@@ -30,6 +30,8 @@ public class Admin implements Serializable {
     */
     @ApiModelProperty("管理员编号")
     private Long id;
+    @ApiModelProperty("是否已经在其他地点登录")
+    private String token;
     /**
     * 创建时间
     */

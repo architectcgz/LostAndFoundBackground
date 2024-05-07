@@ -15,6 +15,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static com.example.lostandfoundbackground.constants.RedisConstants.*;
 
 /**
@@ -47,6 +50,11 @@ public class AdminServiceImpl implements AdminService {
                 String jsonAdmin = RedisUtils.get(key);
                 //将json反序列化为administrator类型
                 admin = JsonUtils.jsonToJavaBean(jsonAdmin,Admin.class);
+                //在其他地点以及登录，删除上次登录的token，挤掉上次的登录
+                String oldToken = admin.getToken();
+                if(oldToken!=null){
+                    RedisUtils.del(LOGIN_ADMIN_KEY+oldToken);
+                }
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -62,9 +70,7 @@ public class AdminServiceImpl implements AdminService {
             if(admin.getStatus()==-1){
                 return Result.error(1,"该管理员已被禁用");
             }
-            //mysql中查到的信息放到redis里，下次登录可以先从redis中查询
-            //设置3天失效3*24*60
-            RedisUtils.storeBeanAsJson(admin,LOGIN_ADMIN_PHONE + phone,4320);
+
         }
 
         //前端传来的加密后的密码与实际密码不同，密码错误
@@ -79,8 +85,15 @@ public class AdminServiceImpl implements AdminService {
         //这里只需要用到一些关键数据：id、phone、name,level,不需要使用createTime和updateTime
         //所以使用adminDTO接收
         AdminDTO adminDTO = BeanUtil.copyProperties(admin, AdminDTO.class);
+
         //设置token有效期 一天失效
         RedisUtils.storeBeanAsHash(adminDTO,LOGIN_ADMIN_KEY + token,1440);
+
+        admin.setToken(token);
+        //mysql中查到的信息放到redis里，下次登录可以先从redis中查询
+        //设置3天失效3*24*60
+        RedisUtils.storeBeanAsJson(admin,LOGIN_ADMIN_PHONE + phone,4320);
+
         //返回token
         return Result.ok(token);
     }
@@ -166,7 +179,10 @@ public class AdminServiceImpl implements AdminService {
             return Result.error(HttpStatus.INTERNAL_ERROR,"发送验证码失败"+e.getMessage());
         }
         //把验证码存放到redis里，失效时间设置为5min
-        RedisUtils.set(SMS_CODE_KEY+phone,smsCode,5);
+        Map<Object,Object> smsMap = new HashMap<>();
+        smsMap.put("code",smsCode);
+        smsMap.put("verified","false");
+        RedisUtils.hmset(SMS_CODE_KEY+phone,smsMap,5L);
         return Result.ok();
     }
 
@@ -179,15 +195,16 @@ public class AdminServiceImpl implements AdminService {
         if(!RedisUtils.hasKey(key)){
             return Result.error(1,"该验证码不存在!");
         }
-        String codeInRedis = RedisUtils.get(key);
+        Map<Object,Object> codeMap = RedisUtils.hmget(key);
+        String codeInRedis = (String) codeMap.get("code");
         log.info("在Redis中保存的验证码是:"+codeInRedis);
         if (codeInRedis == null || !codeInRedis.equals(code)) {
             return Result.error(1,"输入的验证码错误或已过期");
         }
-        //校验过后,删除这次的验证码
-        RedisUtils.del(SMS_CODE_KEY+phone);
-        //验证码校验成功后，修改密码的接口开放10min，保证安全性
-        RedisUtils.set(ADMIN_VERIFICATION_STATUS+phone,"true",10);
+        //验证码校验成功后，修改密码的接口开放5min，保证安全性
+        //校验过后,设置验证码中verified为true
+        RedisUtils.hset(key,"verified","true");
+        RedisUtils.expire(key,5L);
         log.info("校验验证码的线程:"+Thread.currentThread().getName());
         return Result.ok("验证码验证成功");
     }
@@ -205,7 +222,11 @@ public class AdminServiceImpl implements AdminService {
         //先尝试修改密码，然后将当前Redis中存放的管理员信息删除(包括token和登录信息)
         String newPwd = EncryptUtil.getMD5String(changePwdDTO.getRepeatPwd());
         //对比新密码与旧密码是否相同，如果相同，那么不修改，减少数据库操作
-        String oldPwd = adminMapper.getPwd(nowAdmin.getId());
+
+        String oldPwd = (String) RedisUtils.hget(LOGIN_ADMIN_KEY+token,"password");
+
+        log.info(newPwd);
+        log.info(oldPwd);
         if(newPwd.equals(oldPwd)){
             return Result.error(1,"新密码与旧密码相同!");
         }
@@ -214,9 +235,9 @@ public class AdminServiceImpl implements AdminService {
         //从redis中删除token和登录信息
         RedisUtils.del(LOGIN_ADMIN_KEY+token);
         RedisUtils.del(LOGIN_ADMIN_PHONE+nowAdmin.getPhone());
-        //修改密码后重新设置成不允许修改密码,所以删除redis中是否允许修改密码的标记
+        //修改密码后重新设置成不允许修改密码,所以删除redis中上次的验证码
         //再次验证验证码正确后再允许修改密码
-        RedisUtils.del(ADMIN_VERIFICATION_STATUS+nowAdmin.getPhone());
+        RedisUtils.del(SMS_CODE_KEY+nowAdmin.getPhone());
         return Result.ok();
     }
 
