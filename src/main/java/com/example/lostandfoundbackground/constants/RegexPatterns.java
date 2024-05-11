@@ -1,6 +1,13 @@
 package com.example.lostandfoundbackground.constants;
 
 public abstract class RegexPatterns {
+
+    /*
+        用户名正则
+     */
+
+    public static final String USERNAME_REGEX = "^[a-zA-Z0-9_-]{4,10}$";
+
     /**
      * 手机号正则
      */
