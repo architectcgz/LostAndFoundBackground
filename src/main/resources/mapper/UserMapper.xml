@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.lostandfoundbackground.mapper.UserMapper">
+    <insert id="addUser">
+        insert into user
+        (name,password,avatar,phone,status,create_time,update_time)
+        values(
+            #{name},
+            #{password},
+            #{avatar},
+            #{phone},
+            #{status},
+            #{createTime},
+            #{updateTime}
+        )
+    </insert>
+
+    <update id="changePwd">
+        update user
+        set password = #{newPwd},update_time = NOW()
+        where id = #{id}
+    </update>
+
+    <update id="updateAvatar">
+        update user
+        set avatar = #{avatarUrl},update_time = NOW()
+        where id = #{id}
+    </update>
+
+    <select id="findUserBaseByPhone" resultType="com.example.lostandfoundbackground.entity.User">
+        select name,password,avatar,phone,status,create_time,update_time
+        from user
+        where phone = #{phone}
+    </select>
+</mapper>

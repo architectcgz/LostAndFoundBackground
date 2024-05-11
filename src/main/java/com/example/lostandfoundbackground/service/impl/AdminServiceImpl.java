@@ -7,16 +7,15 @@ import cn.hutool.core.util.RandomUtil;
 import com.example.lostandfoundbackground.constants.HttpStatus;
 import com.example.lostandfoundbackground.dto.*;
 import com.example.lostandfoundbackground.entity.Admin;
+import com.example.lostandfoundbackground.entity.Notification;
 import com.example.lostandfoundbackground.mapper.AdminMapper;
+import com.example.lostandfoundbackground.mapper.NotificationMapper;
 import com.example.lostandfoundbackground.service.AdminService;
 import com.example.lostandfoundbackground.utils.*;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.example.lostandfoundbackground.constants.RedisConstants.*;
 
@@ -28,16 +27,15 @@ import static com.example.lostandfoundbackground.constants.RedisConstants.*;
 public class AdminServiceImpl implements AdminService {
     @Resource
     private AdminMapper adminMapper;
+    @Resource
+    private NotificationMapper notificationMapper;
 
     @Override
     public Result login(LoginFormDTO loginForm) {
         //校验手机号和密码
         String phone = loginForm.getPhone();
         String password = loginForm.getPassword();
-        if(!(RegexUtils.isPhoneValid(phone)&&RegexUtils.isPasswordValid(password))){
-            //不符合手机号的格式，返回错误信息
-            log.info("手机号是否符合格式:"+ RegexUtils.isPhoneValid(phone));
-            log.info("密码是否符合格式"+ RegexUtils.isPasswordValid(password));
+        if(!ValidateUtils.validateLoginForm(loginForm)){
             return Result.error(1,"手机号码或密码格式错误");
         }
         //得到加密后的字符串
@@ -113,8 +111,6 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public Result addAdmin(Admin admin) {
         //从ThreadLocal中获取到当前的管理员
-        Thread t = Thread.currentThread();
-        log.info("取出ThreadLocal中的数据时当前线程:"+t.getName());
         AdminDTO nowAdmin = ThreadLocalUtil.get();
         //如果当前的管理员不存在，则说明管理员登录状态失效
         if(nowAdmin == null){
@@ -169,20 +165,14 @@ public class AdminServiceImpl implements AdminService {
         //从ThreadLocal中获取到当前的管理员
         AdminDTO nowAdmin = ThreadLocalUtil.get();
         String phone = nowAdmin.getPhone();
+        if(!RegexUtils.isPasswordValid(phone)){
+            return Result.error(1,"手机号格式不正确!");
+        }
         //发送验证码
         String smsCode = RandomUtil.randomNumbers(6);
-        try {
-            //AliYunSmsUtil.sendSms(phone,smsCode);
-            log.info("验证码:"+smsCode+"\t发送到手机号:"+phone);
-        }catch (Exception e){
-            log.info(e.getMessage());
-            return Result.error(HttpStatus.INTERNAL_ERROR,"发送验证码失败"+e.getMessage());
+        if(!AliYunSmsUtil.sendSmsAndSave(ADMIN_SMS_CODE_KEY,phone,smsCode)){
+            return Result.error(1,"发送验证码失败");
         }
-        //把验证码存放到redis里，失效时间设置为5min
-        Map<Object,Object> smsMap = new HashMap<>();
-        smsMap.put("code",smsCode);
-        smsMap.put("verified","false");
-        RedisUtils.hmset(SMS_CODE_KEY+phone,smsMap,5L);
         return Result.ok();
     }
 
@@ -191,22 +181,7 @@ public class AdminServiceImpl implements AdminService {
         //从ThreadLocal中获取到当前的管理员
         AdminDTO nowAdmin = ThreadLocalUtil.get();
         String phone = nowAdmin.getPhone();
-        String key = SMS_CODE_KEY +phone;
-        if(!RedisUtils.hasKey(key)){
-            return Result.error(1,"该验证码不存在!");
-        }
-        Map<Object,Object> codeMap = RedisUtils.hmget(key);
-        String codeInRedis = (String) codeMap.get("code");
-        log.info("在Redis中保存的验证码是:"+codeInRedis);
-        if (codeInRedis == null || !codeInRedis.equals(code)) {
-            return Result.error(1,"输入的验证码错误或已过期");
-        }
-        //验证码校验成功后，修改密码的接口开放5min，保证安全性
-        //校验过后,设置验证码中verified为true
-        RedisUtils.hset(key,"verified","true");
-        RedisUtils.expire(key,5L);
-        log.info("校验验证码的线程:"+Thread.currentThread().getName());
-        return Result.ok("验证码验证成功");
+        return ValidateUtils.validateSmsCode(ADMIN_SMS_CODE_KEY,phone,code);
     }
 
     @Override
@@ -237,16 +212,25 @@ public class AdminServiceImpl implements AdminService {
         RedisUtils.del(LOGIN_ADMIN_PHONE+nowAdmin.getPhone());
         //修改密码后重新设置成不允许修改密码,所以删除redis中上次的验证码
         //再次验证验证码正确后再允许修改密码
-        RedisUtils.del(SMS_CODE_KEY+nowAdmin.getPhone());
+        RedisUtils.del(ADMIN_SMS_CODE_KEY +nowAdmin.getPhone());
         return Result.ok();
     }
 
     @Override
-    public Result addNews(NewsDTO newsDTO) {
-
+    public Result addNotification(NotificationDTO notificationDTO) {
+        Notification notification = BeanUtil.copyProperties(notificationDTO,Notification.class);
+        AdminDTO nowAdmin = ThreadLocalUtil.get();
+        notification.setCreateAdmin(nowAdmin.getId());
+        notification.setCreateTime(DateTime.now());
+        notification.setUpdateTime(DateTime.now());
+        notificationMapper.add(notification);
         return Result.ok();
     }
-
+    @Override
+    public Result deleteNotification(Long id) {
+        notificationMapper.delete(id);
+        return Result.ok();
+    }
 
 
 

@@ -8,12 +8,12 @@
         insert into administrator
         (phone,name,password,level,create_time,update_time)
         values(
-            #{admin.phone},
-            #{admin.name},
-            #{admin.password},
-            #{admin.level},
-            #{admin.createTime},
-            #{admin.updateTime}
+            #{phone},
+            #{name},
+            #{password},
+            #{level},
+            #{createTime},
+            #{updateTime}
         )
     </insert>
     <update id="changePwd">

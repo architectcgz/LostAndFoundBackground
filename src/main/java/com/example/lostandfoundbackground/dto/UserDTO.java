@@ -23,12 +23,11 @@ public class UserDTO{
     private Long id;
     private String phone;
     private String name;
-
+    private String password;
     private String avatar;
-
     @Override
     public String toString(){
-        return "用户"+id+"\n姓名:"+name+"\n电话:"+phone;
+        return "用户"+id+"\n姓名:"+name+"\n电话:"+phone+"\n密码:"+password;
     }
 
 //    @NotNull(groups = Update.class,message = "id不能为空")

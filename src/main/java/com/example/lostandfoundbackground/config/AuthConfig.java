@@ -17,13 +17,14 @@ public class AuthConfig implements WebMvcConfigurer {
     //不需要登录也能访问的地址
     private final String []WHITE_LIST = {
             "/admin/login",
-            "/user/login"
+            "/user/register/**",
+            "/user/login",
+            "/user/logout",
+            "/user/pwd/modify",
+            "/notification/**"
     };
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-
-        //TODO 添加一些用户不用登录也能看到的接口
-
         //登录拦截器,注意这里是admin与user共用一个登录拦截器
         //如果分开创建两个拦截器，如果不排除彼此，会出现互相拦截的情况
         //所以这里用一个登录拦截器即可

@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 
-import static com.example.lostandfoundbackground.constants.RedisConstants.SMS_CODE_KEY;
+import static com.example.lostandfoundbackground.constants.RedisConstants.ADMIN_SMS_CODE_KEY;
 
 /**
  * @author archi
@@ -16,7 +16,7 @@ import static com.example.lostandfoundbackground.constants.RedisConstants.SMS_CO
 public class AdminPwdInterceptor extends PwdInterceptor<AdminDTO> {
     @Override
     protected boolean getAllowModifyPwd(AdminDTO admin) {
-        Map<Object,Object>result = RedisUtils.hmget(SMS_CODE_KEY+admin.getPhone());
+        Map<Object,Object>result = RedisUtils.hmget(ADMIN_SMS_CODE_KEY +admin.getPhone());
         //redis中不存在 result,也就是已经修改过,不允许未经验证重复修改
         //当result为true时也就是验证通过，允许修改密码
         String verified = (String) result.get("verified");

@@ -2,7 +2,7 @@ package com.example.lostandfoundbackground.controller;
 
 import com.example.lostandfoundbackground.dto.ChangePwdDTO;
 import com.example.lostandfoundbackground.dto.LoginFormDTO;
-import com.example.lostandfoundbackground.dto.NewsDTO;
+import com.example.lostandfoundbackground.dto.NotificationDTO;
 import com.example.lostandfoundbackground.dto.Result;
 import com.example.lostandfoundbackground.entity.Admin;
 import com.example.lostandfoundbackground.service.AdminService;
@@ -66,9 +66,13 @@ public class AdminController {
         return adminService.modifyPwd(token,changePwdDTO);
     }
 
-    @PostMapping("/news/publish")
-    Result addNews(@RequestBody NewsDTO newsDTO){
-        return adminService.addNews(newsDTO);
+    @PostMapping("/notification/publish")
+    Result addNotification(@RequestBody NotificationDTO notificationDTO){
+        return adminService.addNotification(notificationDTO);
     }
 
+    @PostMapping("/notification/delete")
+    Result deleteNotification(@RequestParam Long id){
+        return adminService.deleteNotification(id);
+    }
 }
