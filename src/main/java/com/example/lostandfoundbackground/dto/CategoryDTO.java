@@ -20,6 +20,7 @@ public class CategoryDTO {
     private String categoryName;
     private String categoryAlias;
     private Long createUser;
+    private Long updateUser;
 //    @NotEmpty(groups = Update.class,message = "id不能为空")
 //    private Long id;
 //    private String categoryName;

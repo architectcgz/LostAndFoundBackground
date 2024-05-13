@@ -1,4 +1,4 @@
-package com.example.lostandfoundbackground.interceptors;
+package com.example.lostandfoundbackground.interceptors.user;
 
 import com.example.lostandfoundbackground.utils.ThreadLocalUtil;
 import jakarta.servlet.http.HttpServletRequest;

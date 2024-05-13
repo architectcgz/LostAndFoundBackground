@@ -5,6 +5,9 @@ import com.example.lostandfoundbackground.dto.LoginFormDTO;
 import com.example.lostandfoundbackground.dto.RegisterFormDTO;
 import com.example.lostandfoundbackground.dto.Result;
 
+/**
+ * @author archi
+ */
 public interface UserService {
     Result login(LoginFormDTO loginForm);
 
@@ -25,4 +28,6 @@ public interface UserService {
     Result getUserInfo();
 
     Result updateAvatar(String avatarUrl);
+
+    Result updateUserName(String newName);
 }

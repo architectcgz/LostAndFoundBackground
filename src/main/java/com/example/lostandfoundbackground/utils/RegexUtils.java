@@ -3,6 +3,9 @@ package com.example.lostandfoundbackground.utils;
 import cn.hutool.core.util.StrUtil;
 import com.example.lostandfoundbackground.constants.RegexPatterns;
 
+/**
+ * @author archi
+ */
 public class RegexUtils {
     /*
         用户名是否为有效格式

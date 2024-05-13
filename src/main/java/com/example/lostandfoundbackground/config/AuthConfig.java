@@ -1,7 +1,11 @@
 package com.example.lostandfoundbackground.config;
 
-import com.example.lostandfoundbackground.interceptors.*;
+import com.example.lostandfoundbackground.interceptors.admin.AdminPwdInterceptor;
+import com.example.lostandfoundbackground.interceptors.admin.AdminRefreshTokenInterceptor;
+import com.example.lostandfoundbackground.interceptors.base.CategoryInterceptor;
 import com.example.lostandfoundbackground.interceptors.base.LoginInterceptor;
+import com.example.lostandfoundbackground.interceptors.user.UserPwdInterceptor;
+import com.example.lostandfoundbackground.interceptors.user.UserRefreshTokenInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -21,7 +25,14 @@ public class AuthConfig implements WebMvcConfigurer {
             "/user/login",
             "/user/logout",
             "/user/pwd/modify",
-            "/notification/**"
+            "/notification/**",
+            "/category/list"
+    };
+
+    private final String[]NON_OPEN_CATEGORY_LIST={
+            "/category/add",
+            "/category/update",
+            "category/delete"
     };
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
@@ -49,6 +60,11 @@ public class AuthConfig implements WebMvcConfigurer {
 
         registry.addInterceptor(new UserPwdInterceptor())
                 .addPathPatterns("/user/modifyPwd").order(2);
+
+        //分类拦截器，只允许管理员访问管理分类的接口
+        //而分类列表接口用户和管理员均可调用
+        registry.addInterceptor(new CategoryInterceptor())
+                .addPathPatterns(NON_OPEN_CATEGORY_LIST).order(3);
     }
 
 }

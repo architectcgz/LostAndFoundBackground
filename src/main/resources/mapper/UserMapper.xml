@@ -29,8 +29,14 @@
         where id = #{id}
     </update>
 
+    <update id="updateUserName">
+        update user
+        set name = #{newName},update_time = NOW()
+        where id = #{id}
+    </update>
+
     <select id="findUserBaseByPhone" resultType="com.example.lostandfoundbackground.entity.User">
-        select name,password,avatar,phone,status,create_time,update_time
+        select id,name,password,avatar,phone,status,create_time,update_time
         from user
         where phone = #{phone}
     </select>

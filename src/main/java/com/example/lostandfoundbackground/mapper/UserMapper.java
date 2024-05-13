@@ -17,4 +17,6 @@ public interface UserMapper {
     void addUser(User user);
 
     void updateAvatar(Long id,String avatarUrl);
+
+    void updateUserName(Long id, String newName);
 }

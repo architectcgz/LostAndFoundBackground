@@ -165,7 +165,8 @@ public class AdminServiceImpl implements AdminService {
         //从ThreadLocal中获取到当前的管理员
         AdminDTO nowAdmin = ThreadLocalUtil.get();
         String phone = nowAdmin.getPhone();
-        if(!RegexUtils.isPasswordValid(phone)){
+        log.info(phone);
+        if(!RegexUtils.isPhoneValid(phone)){
             return Result.error(1,"手机号格式不正确!");
         }
         //发送验证码

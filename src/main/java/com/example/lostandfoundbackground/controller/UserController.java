@@ -71,4 +71,9 @@ public class UserController {
     public Result updateAvatar(@RequestParam @URL String avatarUrl){
         return userService.updateAvatar(avatarUrl);
     }
+
+    @PostMapping("/name/update")
+    public Result updateUserName(@RequestParam String newName){
+        return userService.updateUserName(newName);
+    }
 }

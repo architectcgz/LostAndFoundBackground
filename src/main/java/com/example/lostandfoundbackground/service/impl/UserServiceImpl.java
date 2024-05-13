@@ -98,6 +98,31 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Result updateUserName(String newName) {
+        //TODO 修改可以直接修改缓存中的内容，之后考虑使用MQ
+        UserDTO nowUser = ThreadLocalUtil.get();
+        if(newName.equals(nowUser.getName())){
+            return Result.error(1,"新用户名与旧用户名相同!");
+        }
+
+        if(!RegexUtils.isUserNameValid(newName)){
+            return Result.error(1,"用户名格式不正确!");
+        }
+
+        //更新数据库中的信息
+        userMapper.updateUserName(nowUser.getId(),newName);
+        //更新redis中的数据
+        JSONObject jsonObject = JsonUtils.stringToJsonObj(RedisUtils.get(LOGIN_USER_PHONE+nowUser.getPhone()));
+        String token = (String) jsonObject.get("token");
+        jsonObject.replace("avatar",newName);
+
+        RedisUtils.set(LOGIN_USER_PHONE+nowUser.getPhone(),jsonObject.toString());
+
+        RedisUtils.hset(LOGIN_USER_KEY+token,"name",newName);
+        return Result.ok();
+    }
+
+    @Override
     public Result login(LoginFormDTO loginForm) {
         //校验手机号和密码
         String phone = loginForm.getPhone();

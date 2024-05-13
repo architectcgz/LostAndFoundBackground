@@ -1,4 +1,4 @@
-package com.example.lostandfoundbackground.interceptors;
+package com.example.lostandfoundbackground.interceptors.admin;
 
 import com.example.lostandfoundbackground.dto.AdminDTO;
 import com.example.lostandfoundbackground.interceptors.base.PwdInterceptor;

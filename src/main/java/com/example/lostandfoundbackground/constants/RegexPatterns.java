@@ -1,5 +1,8 @@
 package com.example.lostandfoundbackground.constants;
 
+/**
+ * @author archi
+ */
 public abstract class RegexPatterns {
 
     /*
