@@ -1,15 +1,14 @@
 package com.example.lostandfoundbackground.controller;
 
+import com.example.lostandfoundbackground.dto.NotificationDTO;
 import com.example.lostandfoundbackground.dto.Result;
 import com.example.lostandfoundbackground.entity.Notification;
 import com.example.lostandfoundbackground.service.NotificationService;
 import jakarta.annotation.Resource;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -22,12 +21,23 @@ import java.util.List;
 public class NotificationController {
     @Resource
     private NotificationService notificationService;
-    @GetMapping
+    @GetMapping("/list")
     public Result getNotifications(@RequestParam Long pageNum,@RequestParam Long pageSize){
         List<Notification> result = notificationService.getNotificationList((pageNum-1L)*pageSize,pageSize);
 
         return Result.ok(result,(long)result.size());
     }
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/publish")
+    public Result publishNotification(@RequestBody NotificationDTO notificationDTO){
+        return notificationService.addNotification(notificationDTO);
+    }
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/delete/{id}")
+    public Result deleteNotification(@PathVariable("id")Long id){
+        return notificationService.deleteNotification(id);
+    }
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/search/title")
     public Result searchNotificationByTitle(@RequestParam("title")@NotEmpty String title){
         List<Notification> result = notificationService.searchNotificationByTitle(title);

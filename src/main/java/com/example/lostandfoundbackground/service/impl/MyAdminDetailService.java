@@ -1,6 +1,6 @@
 package com.example.lostandfoundbackground.service.impl;
 
-import com.example.lostandfoundbackground.config.security.SecurityAdminDetails;
+import com.example.lostandfoundbackground.config.security.userDetails.SecurityAdminDetails;
 import com.example.lostandfoundbackground.entity.Admin;
 import com.example.lostandfoundbackground.mapper.AdminMapper;
 import com.example.lostandfoundbackground.utils.JsonUtils;
@@ -10,12 +10,14 @@ import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 
 import static com.example.lostandfoundbackground.constants.RedisConstants.LOGIN_ADMIN_PHONE;
 
 /**
  * @author archi
  */
+@Service
 public class MyAdminDetailService implements UserDetailsService {
     @Resource
     private AdminMapper adminMapper;

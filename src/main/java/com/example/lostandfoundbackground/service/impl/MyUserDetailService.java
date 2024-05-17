@@ -1,21 +1,25 @@
 package com.example.lostandfoundbackground.service.impl;
 
-import com.example.lostandfoundbackground.config.security.SecurityUserDetails;
+import com.example.lostandfoundbackground.config.security.userDetails.SecurityUserDetails;
 import com.example.lostandfoundbackground.entity.User;
 import com.example.lostandfoundbackground.mapper.UserMapper;
 import com.example.lostandfoundbackground.utils.JsonUtils;
 import com.example.lostandfoundbackground.utils.RedisUtils;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 
 import static com.example.lostandfoundbackground.constants.RedisConstants.LOGIN_USER_PHONE;
 
 /**
  * @author archi
  */
+@Slf4j
+@Service
 public class MyUserDetailService implements UserDetailsService {
     @Resource
     private UserMapper userMapper;
@@ -32,8 +36,8 @@ public class MyUserDetailService implements UserDetailsService {
         if(user == null){
             user = userMapper.findUserBaseByPhone(username);
             if(user == null){
-                String msg = "Username: " + username + " not found";
-                throw new UsernameNotFoundException(msg);
+                log.info("User name not found: " + username);
+                throw new UsernameNotFoundException("User name not found: " + username);
             }
         }
 

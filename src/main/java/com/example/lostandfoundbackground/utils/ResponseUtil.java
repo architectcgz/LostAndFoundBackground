@@ -13,6 +13,9 @@ public class ResponseUtil {
     public static void response(HttpServletResponse response, Result result, HttpStatus httpStatus) throws IOException {
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(httpStatus.value());
-        response.getWriter().write(JsonUtils.javaBeanToJsonString(result));
+        String jsonStr = JsonUtils.javaBeanToJsonString(result);
+        if(jsonStr!=null){
+            response.getWriter().write(jsonStr);
+        }
     }
 }

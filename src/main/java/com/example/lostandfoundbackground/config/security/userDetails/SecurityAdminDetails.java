@@ -1,6 +1,7 @@
-package com.example.lostandfoundbackground.config.security;
+package com.example.lostandfoundbackground.config.security.userDetails;
 
 import com.example.lostandfoundbackground.entity.Admin;
+import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,6 +13,7 @@ import java.util.stream.Collectors;
 /**
  * @author archi
  */
+@Data
 public class SecurityAdminDetails implements UserDetails {
     private Admin admin;
 
@@ -36,7 +38,7 @@ public class SecurityAdminDetails implements UserDetails {
         this.accountNonExpired = accountNonExpired;
         this.accountNonLocked = accountNonLocked;
         this.credentialsNonExpired = credentialsNonExpired;
-        this.enabled = enabled;
+        this.enabled = admin.getStatus()!=-1;
     }
 
     @Override

@@ -17,6 +17,18 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 
 import java.io.IOException;
 
+/**
+ * @author archi
+ *  * 根据情况设置状态码
+ *  * 将返回结果写入到response
+ *  * 接口：
+ *  * AuthenticationSuccessHandler         ：认证成功 （自定登录接口，json的方式，实现此接口的方法是无效的）
+ *  * AuthenticationFailureHandler         ：认证失败
+ *  * LogoutSuccessHandler                 ：退出登录成功（自定注销登录接口，实现此接口的方法是无效的）
+ *  * SessionInformationExpiredStrategy    ：会话过期 （token认证，实现此接口的方法是无效的）
+ *  * AccessDeniedHandler                  ：验证权限失败 403 (用来解决认证过的用户访问无权限资源时的异常)
+ *  * AuthenticationEntryPoint             ：匿名用户访问无权限资源时的异常，
+ */
 public class SecurityAuthenticationHandler implements AuthenticationSuccessHandler,
         AuthenticationFailureHandler,
         AuthenticationEntryPoint,

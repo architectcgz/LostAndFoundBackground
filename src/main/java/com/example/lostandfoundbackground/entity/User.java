@@ -1,7 +1,6 @@
 package com.example.lostandfoundbackground.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.NotNull;
 
@@ -35,7 +34,7 @@ public class User implements Serializable {
     @ApiModelProperty("")
     private Long id;
 
-    private String token;
+    private String refreshToken;
     /**
     * 创建时间
     */

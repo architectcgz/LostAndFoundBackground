@@ -30,4 +30,6 @@ public interface UserService {
     Result updateAvatar(String avatarUrl);
 
     Result updateUserName(String newName);
+
+    Result refreshToken(String accessToken,String refreshToken);
 }

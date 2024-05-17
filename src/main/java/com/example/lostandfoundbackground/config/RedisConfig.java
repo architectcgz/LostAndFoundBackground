@@ -11,6 +11,9 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+/**
+ * @author archi
+ */
 @Configuration
 public class RedisConfig {
     @Resource

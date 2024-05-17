@@ -1,4 +1,4 @@
-package com.example.lostandfoundbackground.config.security;
+package com.example.lostandfoundbackground.config.security.userDetails;
 
 import com.example.lostandfoundbackground.entity.User;
 import org.springframework.security.core.GrantedAuthority;
@@ -39,6 +39,10 @@ public class SecurityUserDetails implements UserDetails {
         this.accountNonLocked = accountNonLocked;
         this.credentialsNonExpired = credentialsNonExpired;
         this.enabled = enabled;
+    }
+
+    public User getUser(){
+        return this.user;
     }
 
     @Override

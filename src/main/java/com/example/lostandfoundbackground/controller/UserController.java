@@ -28,6 +28,11 @@ public class UserController {
         return userService.logout(token);
     }
 
+    @PostMapping("/refresh_token")
+    Result refreshToken(@RequestHeader("Authorization")String accessToken,@RequestHeader("RefreshToken")String refreshToken){
+        return userService.refreshToken(accessToken,refreshToken);
+    }
+
     @GetMapping("/code")
     Result sendSmsCode(){
         return userService.sendSmsCode();
