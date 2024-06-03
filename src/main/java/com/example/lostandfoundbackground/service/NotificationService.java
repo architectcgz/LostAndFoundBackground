@@ -10,11 +10,11 @@ import java.util.List;
  * @author archi
  */
 public interface NotificationService {
-    List<Notification> getNotificationList(Long offset, Long pageSize);
+    Result getNotificationList(Long offset, Long pageSize);
 
-    List<Notification> searchNotificationByTitle(String title);
+    Result searchNotificationByTitle(String title);
 
-    List<Notification> searchNotificationByPublisher(String publisher);
+    Result searchNotificationByPublisher(String publisher);
 
     Result deleteNotification(Long id);
 

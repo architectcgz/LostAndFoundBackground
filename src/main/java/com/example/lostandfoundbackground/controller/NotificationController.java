@@ -2,15 +2,12 @@ package com.example.lostandfoundbackground.controller;
 
 import com.example.lostandfoundbackground.dto.NotificationDTO;
 import com.example.lostandfoundbackground.dto.Result;
-import com.example.lostandfoundbackground.entity.Notification;
 import com.example.lostandfoundbackground.service.NotificationService;
 import jakarta.annotation.Resource;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * @author archi
@@ -23,9 +20,7 @@ public class NotificationController {
     private NotificationService notificationService;
     @GetMapping("/list")
     public Result getNotifications(@RequestParam Long pageNum,@RequestParam Long pageSize){
-        List<Notification> result = notificationService.getNotificationList((pageNum-1L)*pageSize,pageSize);
-
-        return Result.ok(result,(long)result.size());
+        return notificationService.getNotificationList((pageNum-1L)*pageSize,pageSize);
     }
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/publish")
@@ -37,17 +32,15 @@ public class NotificationController {
     public Result deleteNotification(@PathVariable("id")Long id){
         return notificationService.deleteNotification(id);
     }
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @GetMapping("/search/title")
     public Result searchNotificationByTitle(@RequestParam("title")@NotEmpty String title){
-        List<Notification> result = notificationService.searchNotificationByTitle(title);
-        return Result.ok(result,(long)result.size());
+        return notificationService.searchNotificationByTitle(title);
     }
-
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @GetMapping("/search/publisher")
     public Result searchNotificationByPublisher(@RequestParam("publisher")@NotEmpty String publisher){
-        List<Notification> result = notificationService.searchNotificationByPublisher(publisher);
-        return Result.ok(result,(long)result.size());
+        return notificationService.searchNotificationByPublisher(publisher);
     }
 
 }
