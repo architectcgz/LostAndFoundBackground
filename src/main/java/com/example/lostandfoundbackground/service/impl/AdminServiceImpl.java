@@ -6,7 +6,6 @@ import cn.hutool.core.util.RandomUtil;
 import com.alibaba.fastjson2.JSONObject;
 import com.example.lostandfoundbackground.config.security.jwt.JwtTokenProvider;
 import com.example.lostandfoundbackground.config.security.userDetails.SecurityAdminDetails;
-import com.example.lostandfoundbackground.config.security.userDetails.SecurityUserDetails;
 import com.example.lostandfoundbackground.constants.HttpStatus;
 import com.example.lostandfoundbackground.dto.AdminDTO;
 import com.example.lostandfoundbackground.dto.ChangePwdDTO;
@@ -72,7 +71,8 @@ public class AdminServiceImpl implements AdminService {
             if(RedisUtils.hasKey(key)){
                 String jsonAdmin = RedisUtils.get(key);
                 //将json反序列化为administrator类型
-                admin = JsonUtils.jsonToJavaBean(jsonAdmin,Admin.class);
+                admin = JsonUtils.jsonStrToJavaBean(jsonAdmin,Admin.class);
+
                 //在其他地点以及登录，删除上次登录的token，挤掉上次的登录
                 String oldRefreshToken = admin.getRefreshToken();
                 String oldAccessToken = (String)RedisUtils.hget(LOGIN_ADMIN_REFRESH_TOKEN+oldRefreshToken,"accessToken");
@@ -106,7 +106,7 @@ public class AdminServiceImpl implements AdminService {
         //这里只需要用到一些关键数据：id、phone、name,level,不需要使用createTime和updateTime
         //所以使用adminDTO接收
         AdminDTO adminDTO = BeanUtil.copyProperties(admin, AdminDTO.class);
-
+        adminDTO.setAccessToken(accessToken);
         //设置refreshToken有效期 天失效
         RedisUtils.storeBeanAsHash(adminDTO, LOGIN_ADMIN_REFRESH_TOKEN + refreshToken,REDIS_THREE_DAYS_EXPIRATION);
         //设置accessToken 20分钟过期
@@ -265,17 +265,12 @@ public class AdminServiceImpl implements AdminService {
         if(ObjectUtils.isEmpty(accessToken)){
             return Result.error(HttpStatus.UNAUTHORIZED,"没有accessToken,请先登录!");
         }
-        //服务器中没有这个user的上下文对象，说明这个人并没有登录
-        SecurityAdminDetails userDetails = (SecurityAdminDetails)SecurityContextUtils.getLocalUserDetail();
-        if(userDetails==null){
-            return Result.error(HttpStatus.UNAUTHORIZED,"请先登录");
-        }
+
         String jwtAccessToken = accessToken.substring(7);
         String userName = jwtTokenProvider.getUserName(jwtAccessToken);
-
-        log.info("ThreadLocal中的refreshToken: "+refreshToken);
         String userInRedisStr = RedisUtils.get(LOGIN_ADMIN_PHONE+userName);
         JSONObject userInRedisJson = JsonUtils.stringToJsonObj(userInRedisStr);
+
         String refreshTokenInRedis = (String) userInRedisJson.get("refreshToken");
         boolean refreshTokenValid = userInRedisStr!=null&&refreshTokenInRedis!=null&&refreshTokenInRedis.equals(refreshToken);
 
@@ -293,12 +288,12 @@ public class AdminServiceImpl implements AdminService {
         RedisUtils.hset(LOGIN_ADMIN_REFRESH_TOKEN+refreshToken,"accessToken",newAccessToken);
 
         //删除旧的accessToken
-        log.info("旧的accessToken: "+jwtAccessToken);
         RedisUtils.del(LOGIN_ADMIN_ACCESS_TOKEN+ jwtAccessToken);
 
         //Redis中的RefreshToken刷新
+        String userJsonStr = RedisUtils.get(LOGIN_ADMIN_PHONE+userName);
+        Admin user = JsonUtils.jsonStrToJavaBean(userJsonStr,Admin.class);
 
-        Admin user = userDetails.getAdmin();
         user.setRefreshToken(newRefreshToken);
         RedisUtils.del(LOGIN_ADMIN_REFRESH_TOKEN+refreshToken);
         RedisUtils.storeBeanAsHash(user,LOGIN_ADMIN_REFRESH_TOKEN+newRefreshToken,REDIS_THREE_DAYS_EXPIRATION);
