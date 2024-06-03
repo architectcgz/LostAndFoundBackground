@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.lostandfoundbackground.mapper.CommentMapper">
+
+    <sql id="selectFields">
+        id,user_type,user_id,entity_type,entity_id,targer_id,content,status,create_time,update_time
+    </sql>
+
+    <insert id="addComment" keyColumn="id" useGeneratedKeys="true" keyProperty="id">
+        insert into comment
+        (user_type,user_id,entity_type,entity_id,target_id,content,status,create_time,update_time)
+        values(
+            #{userType},
+            #{userId},
+            #{entityType},
+            #{entityId},
+            #{targetId},
+            #{content},
+            #{status},
+            NOW(),
+            NOW()
+        )
+    </insert>
+
+    <update id="editCommentByEntityId">
+        update comment
+        set content = #{content},
+            update_time = NOW()
+        where id = #{entityId}
+        and entity_type = #{entityType}
+    </update>
+
+    <!--分页查询评论-->
+    <!--排除禁用的评论, 按照创建时间升序排序-->
+    <select id="findCommentByEntity" resultType="com.example.lostandfoundbackground.entity.Comment">
+        select <include refid="selectFields"/>
+        from comment
+        where status = 0
+        and entity_type = #{entityType}
+        and entity_id = #{entityId}
+        order by create_time asc
+        limit #{offset}, #{limit}
+    </select>
+
+    <select id="findCommentById" resultType="com.example.lostandfoundbackground.entity.Comment">
+        select <include refid="selectFields"/>
+        from comment
+        where id = #{id}
+
+    </select>
+    <select id="findCommentCount" resultType="java.lang.Long">
+        select count(id)
+        from comment
+        where status = 0
+        and entity_type = #{entityType}
+        and entity_id = #{entity_id}
+    </select>
+
+    <select id="findCommentByUserId" resultType="com.example.lostandfoundbackground.entity.Comment">
+        select <include refid="selectFields"/>
+        from comment
+        where id = #{userId}
+        and user_type = #{userType}
+        limit #{offset}, #{limit}
+    </select>
+</mapper>
