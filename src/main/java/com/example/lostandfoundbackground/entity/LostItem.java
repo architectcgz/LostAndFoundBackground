@@ -1,7 +1,6 @@
 package com.example.lostandfoundbackground.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.NotNull;
 
@@ -33,20 +32,20 @@ public class LostItem implements Serializable {
     */
     @NotNull(message="[]不能为空")
     @ApiModelProperty("")
-    private Integer id;
+    private Long id;
     /**
     * 创建时间
     */
     @NotNull(message="[创建时间]不能为空")
     @ApiModelProperty("创建时间")
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
     /**
     * 更新时间
     */
     @NotNull(message="[更新时间]不能为空")
     @ApiModelProperty("更新时间")
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date updateTime;
     /**
     * 失物名称
@@ -66,7 +65,7 @@ public class LostItem implements Serializable {
     * 失物类别
     */
     @ApiModelProperty("失物类别")
-    private Integer categoryId;
+    private Long categoryId;
     /**
     * 丢失地点
     */
@@ -77,9 +76,9 @@ public class LostItem implements Serializable {
     /**
     * 丢失时间
     */
-    @NotNull(message="[丢失时间]不能为空")
+    @NotNull(message="丢失时间不能为空")
     @ApiModelProperty("丢失时间")
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private Date lostTime;
     /**
     * 详细描述
@@ -106,11 +105,11 @@ public class LostItem implements Serializable {
     * 是否已经找到
     */
     @ApiModelProperty("是否已经找到")
-    private Integer founded;
+    private int founded;
     /**
     * 创建这条失物信息的用户id
     */
     @ApiModelProperty("创建这条失物信息的用户id")
-    private Integer createUser;
+    private Long createUser;
 
 }
