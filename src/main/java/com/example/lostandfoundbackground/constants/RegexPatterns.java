@@ -1,9 +1,12 @@
 package com.example.lostandfoundbackground.constants;
 
+/**
+ * @author archi
+ */
 public abstract class RegexPatterns {
 
     /*
-        用户名正则
+        用户名正则 1-10个中英文字符或数字
      */
 
     public static final String USERNAME_REGEX = "^[\\u4e00-\\u9fa5a-zA-Z0-9]{1,10}$";
@@ -14,7 +17,7 @@ public abstract class RegexPatterns {
     public static final String PHONE_REGEX = "^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\\d{8}$";
 
     /*
-    密码正则表达式 必须包含大小写字母和特殊符号，至少8位
+    密码正则表达式 必须包含大小写字母和特殊符号，至少8位,最多20位
      */
     public static final String PASSWORD_REGEX = "^(?![A-Za-z0-9]+$)(?![a-z0-9\\W]+$)(?![A-Za-z\\W]+$)(?![A-Z0-9\\W]+$)[a-zA-Z0-9\\W]{8,20}$";
     /**

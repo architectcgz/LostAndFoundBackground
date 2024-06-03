@@ -28,6 +28,11 @@ public class UserController {
         return userService.logout(token);
     }
 
+    @PostMapping("/refresh_token")
+    Result refreshToken(@RequestHeader("Authorization")String accessToken,@RequestHeader("RefreshToken")String refreshToken){
+        return userService.refreshToken(accessToken,refreshToken);
+    }
+
     @GetMapping("/code")
     Result sendSmsCode(){
         return userService.sendSmsCode();
@@ -70,5 +75,10 @@ public class UserController {
     @PostMapping("/avatar/update")
     public Result updateAvatar(@RequestParam @URL String avatarUrl){
         return userService.updateAvatar(avatarUrl);
+    }
+
+    @PostMapping("/name/update")
+    public Result updateUserName(@RequestParam String newName){
+        return userService.updateUserName(newName);
     }
 }

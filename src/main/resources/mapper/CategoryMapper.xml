@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.lostandfoundbackground.mapper.CategoryMapper">
+
+    <insert id="add">
+        insert into category
+        (name,alias,create_user,create_time,update_time)
+        values
+        (
+            #{categoryName},
+            #{categoryAlias},
+            #{create_user},
+            #{update_user},
+            #{createTime},
+            #{updateTime}
+        )
+    </insert>
+    <update id="update">
+        update category
+        set name = #{categoryName},
+            alias = #{categoryAlias},
+            update_user = #{updateUser}
+            update_time = NOW()
+    </update>
+
+    <delete id="remove">
+        delete from category
+        where name = #{categoryName}
+    </delete>
+    <select id="list" resultType="com.example.lostandfoundbackground.entity.Category">
+        select id,name,alias,create_user,update_user,create_time,update_time
+        from category
+    </select>
+</mapper>

@@ -20,11 +20,11 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 public class RedisUtils {
-    private static StringRedisTemplate SPRING_REDIS_TEMPLATE;
+    private static StringRedisTemplate STRING_REDIS_TEMPLATE;
 
     @Autowired
     public void setSpringRedisTemplate(StringRedisTemplate springRedisTemplate){
-        RedisUtils.SPRING_REDIS_TEMPLATE = springRedisTemplate;
+        RedisUtils.STRING_REDIS_TEMPLATE = springRedisTemplate;
     }
     /**
      * 指定缓存失效时间
@@ -35,7 +35,7 @@ public class RedisUtils {
     public static boolean expire(String key, long time) {
         try {
             if (time > 0) {
-                SPRING_REDIS_TEMPLATE.expire(key, time, TimeUnit.MINUTES);
+                STRING_REDIS_TEMPLATE.expire(key, time, TimeUnit.MINUTES);
             }
             return true;
         } catch (Exception e) {
@@ -49,7 +49,7 @@ public class RedisUtils {
      * @return
      */
     public static long getExpire(String key) {
-        return SPRING_REDIS_TEMPLATE.getExpire(key, TimeUnit.MINUTES);
+        return STRING_REDIS_TEMPLATE.getExpire(key, TimeUnit.MINUTES);
     }
 
     /**
@@ -59,7 +59,7 @@ public class RedisUtils {
      */
     public static boolean hasKey(String key) {
         try {
-            return SPRING_REDIS_TEMPLATE.hasKey(key);
+            return STRING_REDIS_TEMPLATE.hasKey(key);
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -75,10 +75,10 @@ public class RedisUtils {
     public static void del(String... key) {
         if (key != null && key.length > 0) {
             if (key.length == 1) {
-                SPRING_REDIS_TEMPLATE.delete(key[0]);
+                STRING_REDIS_TEMPLATE.delete(key[0]);
             } else {
                 //传入一个 Collection<String> 集合
-                SPRING_REDIS_TEMPLATE.delete((Collection<String>) CollectionUtils.arrayToList(key));
+                STRING_REDIS_TEMPLATE.delete((Collection<String>) CollectionUtils.arrayToList(key));
             }
         }
     }
@@ -88,7 +88,7 @@ public class RedisUtils {
      * @return 值
      */
     public static String get(String key) {
-        return StringUtils.hasLength(key) ? SPRING_REDIS_TEMPLATE.opsForValue().get(key) : null;
+        return StringUtils.hasLength(key) ? STRING_REDIS_TEMPLATE.opsForValue().get(key) : null;
     }
 
     /**
@@ -99,7 +99,7 @@ public class RedisUtils {
      */
     public static boolean set(String key, String value) {
         try {
-            SPRING_REDIS_TEMPLATE.opsForValue().set(key, value);
+            STRING_REDIS_TEMPLATE.opsForValue().set(key, value);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -117,7 +117,7 @@ public class RedisUtils {
     public static boolean set(String key, String value, long time) {
         try {
             if (time > 0) {
-                SPRING_REDIS_TEMPLATE.opsForValue().set(key, value, time, TimeUnit.MINUTES);
+                STRING_REDIS_TEMPLATE.opsForValue().set(key, value, time, TimeUnit.MINUTES);
             } else {
                 set(key, value);
             }
@@ -138,7 +138,7 @@ public class RedisUtils {
         if (delta < 0) {
             throw new RuntimeException("递增因子必须大于 0");
         }
-        return SPRING_REDIS_TEMPLATE.opsForValue().increment(key, delta);
+        return STRING_REDIS_TEMPLATE.opsForValue().increment(key, delta);
     }
 
     /**
@@ -151,7 +151,7 @@ public class RedisUtils {
         if (delta < 0) {
             throw new RuntimeException("递减因子必须大于 0");
         }
-        return SPRING_REDIS_TEMPLATE.opsForValue().increment(key, delta);
+        return STRING_REDIS_TEMPLATE.opsForValue().increment(key, delta);
     }
 
 
@@ -163,7 +163,7 @@ public class RedisUtils {
      * @return 值
      */
     public static Object hget(String key, String item) {
-        return SPRING_REDIS_TEMPLATE.opsForHash().get(key, item);
+        return STRING_REDIS_TEMPLATE.opsForHash().get(key, item);
     }
 
     /**
@@ -172,7 +172,7 @@ public class RedisUtils {
      * @return 对应的多个键值
      */
     public static Map<Object, Object> hmget(String key) {
-        return SPRING_REDIS_TEMPLATE.opsForHash().entries(key);
+        return STRING_REDIS_TEMPLATE.opsForHash().entries(key);
     }
 
     /**
@@ -183,7 +183,7 @@ public class RedisUtils {
      */
     public static boolean hmset(String key, Map<Object, Object> map) {
         try {
-            SPRING_REDIS_TEMPLATE.opsForHash().putAll(key, map);
+            STRING_REDIS_TEMPLATE.opsForHash().putAll(key, map);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -200,7 +200,7 @@ public class RedisUtils {
      */
     public static boolean hmset(String key, Map<Object, Object> map, long time) {
         try {
-            SPRING_REDIS_TEMPLATE.opsForHash().putAll(key, map);
+            STRING_REDIS_TEMPLATE.opsForHash().putAll(key, map);
             if (time > 0) {
                 expire(key, time);
             }
@@ -220,7 +220,7 @@ public class RedisUtils {
      */
     public static boolean hset(String key, String item, Object value) {
         try {
-            SPRING_REDIS_TEMPLATE.opsForHash().put(key, item, value);
+            STRING_REDIS_TEMPLATE.opsForHash().put(key, item, value);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -238,7 +238,7 @@ public class RedisUtils {
      */
     public static boolean hset(String key, String item, Object value, long time) {
         try {
-            SPRING_REDIS_TEMPLATE.opsForHash().put(key, item, value);
+            STRING_REDIS_TEMPLATE.opsForHash().put(key, item, value);
             if (time > 0) {
                 expire(key, time);
             }
@@ -255,7 +255,7 @@ public class RedisUtils {
      * @param item 项（可以多个，no null）
      */
     public static void hdel(String key, Object... item) {
-        SPRING_REDIS_TEMPLATE.opsForHash().delete(key, item);
+        STRING_REDIS_TEMPLATE.opsForHash().delete(key, item);
     }
 
     /**
@@ -265,7 +265,7 @@ public class RedisUtils {
      * @return true / false
      */
     public static boolean hHasKey(String key, String item) {
-        return SPRING_REDIS_TEMPLATE.opsForHash().hasKey(key, item);
+        return STRING_REDIS_TEMPLATE.opsForHash().hasKey(key, item);
     }
 
     /**
@@ -276,7 +276,7 @@ public class RedisUtils {
      * @return
      */
     public static Double hincr(String key, String item, Double by) {
-        return SPRING_REDIS_TEMPLATE.opsForHash().increment(key, item, by);
+        return STRING_REDIS_TEMPLATE.opsForHash().increment(key, item, by);
     }
 
     /**
@@ -287,7 +287,7 @@ public class RedisUtils {
      * @return
      */
     public static Double hdecr(String key, String item, Double by) {
-        return SPRING_REDIS_TEMPLATE.opsForHash().increment(key, item, -by);
+        return STRING_REDIS_TEMPLATE.opsForHash().increment(key, item, -by);
     }
 
 
@@ -312,17 +312,17 @@ public class RedisUtils {
                             return fieldValue.toString();
                         }));
 
-        SPRING_REDIS_TEMPLATE.opsForHash().putAll(redisKey, beanMap);
-        SPRING_REDIS_TEMPLATE.expire(redisKey, redisTTL, TimeUnit.MINUTES);
+        STRING_REDIS_TEMPLATE.opsForHash().putAll(redisKey, beanMap);
+        STRING_REDIS_TEMPLATE.expire(redisKey, redisTTL, TimeUnit.MINUTES);
     }
 
     public static void storeBeanAsJson(Object bean, String redisKey, long redisTTL) {
         String jsonValue = JsonUtils.javaBeanToJsonString(bean);
         log.info(jsonValue);
         if (jsonValue != null) {
-            SPRING_REDIS_TEMPLATE.opsForValue().set(redisKey,jsonValue);
+            STRING_REDIS_TEMPLATE.opsForValue().set(redisKey,jsonValue);
         }
-        SPRING_REDIS_TEMPLATE.expire(redisKey, redisTTL, TimeUnit.MINUTES);
+        STRING_REDIS_TEMPLATE.expire(redisKey, redisTTL, TimeUnit.MINUTES);
     }
 
 

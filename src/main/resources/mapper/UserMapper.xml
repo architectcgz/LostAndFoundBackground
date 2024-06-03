@@ -3,7 +3,7 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.lostandfoundbackground.mapper.UserMapper">
-    <insert id="addUser">
+    <insert id="addUser" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         insert into user
         (name,password,avatar,phone,status,create_time,update_time)
         values(
@@ -29,8 +29,14 @@
         where id = #{id}
     </update>
 
+    <update id="updateUserName">
+        update user
+        set name = #{newName},update_time = NOW()
+        where id = #{id}
+    </update>
+
     <select id="findUserBaseByPhone" resultType="com.example.lostandfoundbackground.entity.User">
-        select name,password,avatar,phone,status,create_time,update_time
+        select id,name,password,avatar,phone,status,create_time,update_time
         from user
         where phone = #{phone}
     </select>

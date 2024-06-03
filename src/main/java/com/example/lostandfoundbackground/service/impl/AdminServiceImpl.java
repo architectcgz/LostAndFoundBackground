@@ -2,22 +2,34 @@ package com.example.lostandfoundbackground.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateTime;
-import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.RandomUtil;
+import com.alibaba.fastjson2.JSONObject;
+import com.example.lostandfoundbackground.config.security.jwt.JwtTokenProvider;
+import com.example.lostandfoundbackground.config.security.userDetails.SecurityAdminDetails;
+import com.example.lostandfoundbackground.config.security.userDetails.SecurityUserDetails;
 import com.example.lostandfoundbackground.constants.HttpStatus;
-import com.example.lostandfoundbackground.dto.*;
+import com.example.lostandfoundbackground.dto.AdminDTO;
+import com.example.lostandfoundbackground.dto.ChangePwdDTO;
+import com.example.lostandfoundbackground.dto.LoginFormDTO;
+import com.example.lostandfoundbackground.dto.Result;
 import com.example.lostandfoundbackground.entity.Admin;
-import com.example.lostandfoundbackground.entity.Notification;
 import com.example.lostandfoundbackground.mapper.AdminMapper;
-import com.example.lostandfoundbackground.mapper.NotificationMapper;
 import com.example.lostandfoundbackground.service.AdminService;
 import com.example.lostandfoundbackground.utils.*;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static com.example.lostandfoundbackground.constants.RedisConstants.*;
+import static com.example.lostandfoundbackground.constants.SystemConstants.*;
 
 /**
  * @author archi
@@ -27,8 +39,15 @@ import static com.example.lostandfoundbackground.constants.RedisConstants.*;
 public class AdminServiceImpl implements AdminService {
     @Resource
     private AdminMapper adminMapper;
+
     @Resource
-    private NotificationMapper notificationMapper;
+    private PasswordEncoder passwordEncoder;
+
+    @Resource
+    private AuthenticationManager authenticationManager;
+
+    @Resource
+    private JwtTokenProvider jwtTokenProvider;
 
     @Override
     public Result login(LoginFormDTO loginForm) {
@@ -38,8 +57,14 @@ public class AdminServiceImpl implements AdminService {
         if(!ValidateUtils.validateLoginForm(loginForm)){
             return Result.error(1,"手机号码或密码格式错误");
         }
-        //得到加密后的字符串
-        String encryptedPwd = EncryptUtil.getMD5String(password);
+        log.info("开始验证Admin: "+phone+" 的密码是否正确");
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        phone,password
+                )
+        );
+        log.info("密码是否正确验证完成");
+
         //从redis中尝试查询Admin，不存在再去MySql查询
         Admin admin = null;
         String key = LOGIN_ADMIN_PHONE + phone;
@@ -49,10 +74,12 @@ public class AdminServiceImpl implements AdminService {
                 //将json反序列化为administrator类型
                 admin = JsonUtils.jsonToJavaBean(jsonAdmin,Admin.class);
                 //在其他地点以及登录，删除上次登录的token，挤掉上次的登录
-                String oldToken = admin.getToken();
-                if(oldToken!=null){
-                    RedisUtils.del(LOGIN_ADMIN_KEY+oldToken);
-                }
+                String oldRefreshToken = admin.getRefreshToken();
+                String oldAccessToken = (String)RedisUtils.hget(LOGIN_ADMIN_REFRESH_TOKEN+oldRefreshToken,"accessToken");
+                log.info("OldRefreshToken: "+oldRefreshToken);
+                log.info("OldAccessToken: "+oldAccessToken);
+                RedisUtils.del(LOGIN_ADMIN_ACCESS_TOKEN+oldAccessToken);
+                RedisUtils.del(LOGIN_ADMIN_REFRESH_TOKEN+oldRefreshToken);
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -68,32 +95,28 @@ public class AdminServiceImpl implements AdminService {
             if(admin.getStatus()==-1){
                 return Result.error(1,"该管理员已被禁用");
             }
-
         }
+        String refreshToken = jwtTokenProvider.generateToken(admin.getPhone(),ROLE_ADMIN,REFRESH_TOKEN_EXPIRATION);
+        String accessToken = jwtTokenProvider.generateToken(admin.getPhone(),ROLE_ADMIN,ACCESS_TOKEN_EXPIRATION);
+        admin.setRefreshToken(refreshToken);
 
-        //前端传来的加密后的密码与实际密码不同，密码错误
-        if(!admin.getPassword().equals(encryptedPwd)){
-            return Result.error(1,"密码错误,请重新输入");
-        }
-        //到这里，管理员存在且密码正确，发放令牌
-        //UUID.randomUUID().toString(true) true参数表示UUID中不含有'-'
-        String token = UUID.randomUUID().toString(true);
+        Map<String,String> tokenMap = jwtTokenProvider.generateTokenMap(accessToken,refreshToken);
 
         //将Administrator转化为HashMap
         //这里只需要用到一些关键数据：id、phone、name,level,不需要使用createTime和updateTime
         //所以使用adminDTO接收
         AdminDTO adminDTO = BeanUtil.copyProperties(admin, AdminDTO.class);
 
-        //设置token有效期 一天失效
-        RedisUtils.storeBeanAsHash(adminDTO,LOGIN_ADMIN_KEY + token,1440);
-
-        admin.setToken(token);
+        //设置refreshToken有效期 天失效
+        RedisUtils.storeBeanAsHash(adminDTO, LOGIN_ADMIN_REFRESH_TOKEN + refreshToken,REDIS_THREE_DAYS_EXPIRATION);
+        //设置accessToken 20分钟过期
+        RedisUtils.set(LOGIN_ADMIN_ACCESS_TOKEN+accessToken,accessToken,20L);
         //mysql中查到的信息放到redis里，下次登录可以先从redis中查询
-        //设置3天失效3*24*60
-        RedisUtils.storeBeanAsJson(admin,LOGIN_ADMIN_PHONE + phone,4320);
+        //设置7天失效
+        RedisUtils.storeBeanAsJson(admin,LOGIN_ADMIN_PHONE + phone,REDIS_ONE_WEEK_EXPIRATION);
 
         //返回token
-        return Result.ok(token);
+        return Result.ok(tokenMap);
     }
 
     /*
@@ -104,14 +127,15 @@ public class AdminServiceImpl implements AdminService {
         if(!StringUtils.hasLength(token)){
             return Result.error(HttpStatus.UNAUTHORIZED,"用户未登录!");
         }
-        RedisUtils.del(LOGIN_ADMIN_KEY+token);
+        RedisUtils.del(LOGIN_ADMIN_REFRESH_TOKEN +token);
         return Result.ok();
     }
 
     @Override
     public Result addAdmin(Admin admin) {
         //从ThreadLocal中获取到当前的管理员
-        AdminDTO nowAdmin = ThreadLocalUtil.get();
+        SecurityAdminDetails adminDetails = (SecurityAdminDetails) SecurityContextUtils.getLocalUserDetail();
+        Admin nowAdmin = adminDetails.getAdmin();
         //如果当前的管理员不存在，则说明管理员登录状态失效
         if(nowAdmin == null){
             return Result.error(HttpStatus.UNAUTHORIZED,"添加失败,请检查登录状态!");
@@ -141,7 +165,12 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public Result banAdmin(Long id) {
         //从ThreadLocal中获取到当前的管理员
-        AdminDTO nowAdmin = ThreadLocalUtil.get();
+        SecurityAdminDetails adminDetails = (SecurityAdminDetails) SecurityContextUtils.getLocalUserDetail();
+        Admin nowAdmin = adminDetails.getAdmin();
+        //如果当前的管理员不存在，则说明管理员登录状态失效
+        if(nowAdmin == null){
+            return Result.error(HttpStatus.UNAUTHORIZED,"添加失败,请检查登录状态!");
+        }
         if(nowAdmin.getLevel()<100){
             return Result.error(1,"管理员权限不足,不允许禁用其他管理员!");
         }
@@ -163,9 +192,15 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public Result sendSmsCode() {
         //从ThreadLocal中获取到当前的管理员
-        AdminDTO nowAdmin = ThreadLocalUtil.get();
+        SecurityAdminDetails adminDetails = (SecurityAdminDetails) SecurityContextUtils.getLocalUserDetail();
+        Admin nowAdmin = adminDetails.getAdmin();
+        //如果当前的管理员不存在，则说明管理员登录状态失效
+        if(nowAdmin == null){
+            return Result.error(HttpStatus.UNAUTHORIZED,"添加失败,请检查登录状态!");
+        }
         String phone = nowAdmin.getPhone();
-        if(!RegexUtils.isPasswordValid(phone)){
+        log.info(phone);
+        if(!RegexUtils.isPhoneValid(phone)){
             return Result.error(1,"手机号格式不正确!");
         }
         //发送验证码
@@ -179,7 +214,12 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public Result validateSmsCode(String code,String token) {
         //从ThreadLocal中获取到当前的管理员
-        AdminDTO nowAdmin = ThreadLocalUtil.get();
+        SecurityAdminDetails adminDetails = (SecurityAdminDetails) SecurityContextUtils.getLocalUserDetail();
+        Admin nowAdmin = adminDetails.getAdmin();
+        //如果当前的管理员不存在，则说明管理员登录状态失效
+        if(nowAdmin == null){
+            return Result.error(HttpStatus.UNAUTHORIZED,"添加失败,请检查登录状态!");
+        }
         String phone = nowAdmin.getPhone();
         return ValidateUtils.validateSmsCode(ADMIN_SMS_CODE_KEY,phone,code);
     }
@@ -187,18 +227,22 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public Result modifyPwd(String token, ChangePwdDTO changePwdDTO) {
         //从ThreadLocal中获取到当前的管理员
-        log.info("修改密码的线程:"+Thread.currentThread().getName());
-        AdminDTO nowAdmin = ThreadLocalUtil.get();
+        SecurityAdminDetails adminDetails = (SecurityAdminDetails) SecurityContextUtils.getLocalUserDetail();
+        Admin nowAdmin = adminDetails.getAdmin();
+        //如果当前的管理员不存在，则说明管理员登录状态失效
+        if(nowAdmin == null){
+            return Result.error(HttpStatus.UNAUTHORIZED,"添加失败,请检查登录状态!");
+        }
 
         if(!changePwdDTO.getNewPwd().equals(changePwdDTO.getRepeatPwd())){
             return Result.error(1,"两次输入的密码不相同,请检查");
         }
 
         //先尝试修改密码，然后将当前Redis中存放的管理员信息删除(包括token和登录信息)
-        String newPwd = EncryptUtil.getMD5String(changePwdDTO.getRepeatPwd());
+        String newPwd = passwordEncoder.encode(changePwdDTO.getRepeatPwd());
         //对比新密码与旧密码是否相同，如果相同，那么不修改，减少数据库操作
 
-        String oldPwd = (String) RedisUtils.hget(LOGIN_ADMIN_KEY+token,"password");
+        String oldPwd = (String) RedisUtils.hget(LOGIN_ADMIN_REFRESH_TOKEN +token,"password");
 
         log.info(newPwd);
         log.info(oldPwd);
@@ -208,7 +252,7 @@ public class AdminServiceImpl implements AdminService {
         //新旧密码不相同再修改
         adminMapper.changePwd(nowAdmin.getId(),newPwd);
         //从redis中删除token和登录信息
-        RedisUtils.del(LOGIN_ADMIN_KEY+token);
+        RedisUtils.del(LOGIN_ADMIN_REFRESH_TOKEN +token);
         RedisUtils.del(LOGIN_ADMIN_PHONE+nowAdmin.getPhone());
         //修改密码后重新设置成不允许修改密码,所以删除redis中上次的验证码
         //再次验证验证码正确后再允许修改密码
@@ -217,21 +261,62 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Result addNotification(NotificationDTO notificationDTO) {
-        Notification notification = BeanUtil.copyProperties(notificationDTO,Notification.class);
-        AdminDTO nowAdmin = ThreadLocalUtil.get();
-        notification.setCreateAdmin(nowAdmin.getId());
-        notification.setCreateTime(DateTime.now());
-        notification.setUpdateTime(DateTime.now());
-        notificationMapper.add(notification);
-        return Result.ok();
-    }
-    @Override
-    public Result deleteNotification(Long id) {
-        notificationMapper.delete(id);
-        return Result.ok();
-    }
+    public Result refreshToken(String accessToken,String refreshToken) {
+        if(ObjectUtils.isEmpty(accessToken)){
+            return Result.error(HttpStatus.UNAUTHORIZED,"没有accessToken,请先登录!");
+        }
+        //服务器中没有这个user的上下文对象，说明这个人并没有登录
+        SecurityAdminDetails userDetails = (SecurityAdminDetails)SecurityContextUtils.getLocalUserDetail();
+        if(userDetails==null){
+            return Result.error(HttpStatus.UNAUTHORIZED,"请先登录");
+        }
+        String jwtAccessToken = accessToken.substring(7);
+        String userName = jwtTokenProvider.getUserName(jwtAccessToken);
 
+        log.info("ThreadLocal中的refreshToken: "+refreshToken);
+        String userInRedisStr = RedisUtils.get(LOGIN_ADMIN_PHONE+userName);
+        JSONObject userInRedisJson = JsonUtils.stringToJsonObj(userInRedisStr);
+        String refreshTokenInRedis = (String) userInRedisJson.get("refreshToken");
+        boolean refreshTokenValid = userInRedisStr!=null&&refreshTokenInRedis!=null&&refreshTokenInRedis.equals(refreshToken);
+
+        //本地不存在RefreshToken 或者是 Redis中存储的RefreshToken已经过期,此时不允许获取新的accessToken，必须重新登录
+        if(ObjectUtils.isEmpty(refreshToken)||!refreshTokenValid){
+            return Result.error(HttpStatus.UNAUTHORIZED,"登陆令牌不存在或已过期,请先登录");
+        }
+
+        String newAccessToken = jwtTokenProvider.generateToken(userName,ROLE_ADMIN,ACCESS_TOKEN_EXPIRATION);
+        String newRefreshToken = jwtTokenProvider.generateToken(userName,ROLE_ADMIN,REFRESH_TOKEN_EXPIRATION);
+
+        userInRedisJson.replace("refreshToken",newRefreshToken);
+
+        //刷新 Redis中LOGIN_USER_REFRESH_TOKEN的accessToken
+        RedisUtils.hset(LOGIN_ADMIN_REFRESH_TOKEN+refreshToken,"accessToken",newAccessToken);
+
+        //删除旧的accessToken
+        log.info("旧的accessToken: "+jwtAccessToken);
+        RedisUtils.del(LOGIN_ADMIN_ACCESS_TOKEN+ jwtAccessToken);
+
+        //Redis中的RefreshToken刷新
+
+        Admin user = userDetails.getAdmin();
+        user.setRefreshToken(newRefreshToken);
+        RedisUtils.del(LOGIN_ADMIN_REFRESH_TOKEN+refreshToken);
+        RedisUtils.storeBeanAsHash(user,LOGIN_ADMIN_REFRESH_TOKEN+newRefreshToken,REDIS_THREE_DAYS_EXPIRATION);
+        //AccessToken保存20min
+        RedisUtils.set(LOGIN_ADMIN_ACCESS_TOKEN+newAccessToken,"ok",20L);
+        //刷新loginUser的时间
+        RedisUtils.set(LOGIN_ADMIN_PHONE+userName,JsonUtils.objToJsonString(userInRedisJson),REDIS_ONE_WEEK_EXPIRATION);
+        Map<String,String>tokenMap = new HashMap<>(){
+            {
+                put("accessToken",newAccessToken);
+                put("refreshToken",newRefreshToken);
+            }
+        };
+
+        return Result.ok(tokenMap);
+
+
+    }
 
 
 }

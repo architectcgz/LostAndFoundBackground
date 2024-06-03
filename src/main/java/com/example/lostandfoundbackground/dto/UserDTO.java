@@ -1,17 +1,8 @@
 package com.example.lostandfoundbackground.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import jakarta.validation.constraints.NotNull;
 import lombok.NoArgsConstructor;
-import org.apache.ibatis.annotations.Update;
-import org.hibernate.validator.constraints.URL;
-
-import java.time.LocalDateTime;
 
 /**
  * @author archi
@@ -25,6 +16,7 @@ public class UserDTO{
     private String name;
     private String password;
     private String avatar;
+    private String accessToken;
     @Override
     public String toString(){
         return "用户"+id+"\n姓名:"+name+"\n电话:"+phone+"\n密码:"+password;

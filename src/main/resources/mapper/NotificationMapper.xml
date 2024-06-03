@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.lostandfoundbackground.mapper.NotificationMapper">
+
+    <insert id="add">
+        insert into notification
+        (title,description,content ,create_admin,create_time,update_time)
+        values (
+            #{title},
+            #{description},
+            #{content},
+            #{createAdmin},
+            #{createTime},
+            #{updateTime}
+        )
+    </insert>
+    <delete id="delete">
+        delete from notification
+        where id = #{id}
+    </delete>
+    <select id="getById" resultType="com.example.lostandfoundbackground.entity.Notification">
+        select id,title,description,content ,create_admin,create_time,update_time
+        from notification
+        where id = #{id}
+    </select>
+
+    <select id="getList" resultType="com.example.lostandfoundbackground.entity.Notification">
+        select id,title,description,content ,create_admin,create_time,update_time
+        from notification
+        limit #{pageSize}
+        offset #{offset}
+    </select>
+
+    <select id="searchByTitle" resultType="com.example.lostandfoundbackground.entity.Notification">
+        select id,title,description,content ,create_admin,create_time,update_time
+        from notification
+        where title like CONCAT('%', #{title}, '%')
+    </select>
+
+
+    <select id="searchByAdminName" resultType="com.example.lostandfoundbackground.entity.Notification">
+        select n.id,n.title,n.description,n.content ,n.create_admin,n.create_time,n.update_time
+        from notification as n
+        join administrator as admin
+        on admin.id = n.create_admin
+        where admin.name like CONCAT('%', #{adminName}, '%')
+    </select>
+
+
+</mapper>

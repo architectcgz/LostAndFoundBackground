@@ -2,7 +2,6 @@ package com.example.lostandfoundbackground.controller;
 
 import com.example.lostandfoundbackground.dto.ChangePwdDTO;
 import com.example.lostandfoundbackground.dto.LoginFormDTO;
-import com.example.lostandfoundbackground.dto.NotificationDTO;
 import com.example.lostandfoundbackground.dto.Result;
 import com.example.lostandfoundbackground.entity.Admin;
 import com.example.lostandfoundbackground.service.AdminService;
@@ -22,11 +21,16 @@ import org.springframework.web.bind.annotation.*;
 public class AdminController {
     @Resource
     private AdminService adminService;
+
     @PostMapping("/login")
     Result login(@RequestBody LoginFormDTO loginForm){
         return adminService.login(loginForm);
     }
 
+    @PostMapping("/refresh_token")
+    public Result refreshToken(@RequestHeader("Authorization")String accessToken,@RequestHeader("RefreshToken")String refreshToken){
+        return adminService.refreshToken(accessToken,refreshToken);
+    }
     @PostMapping("/logout")
     Result logout(@RequestHeader("Authorization")String token){
         return adminService.logout(token);
@@ -64,15 +68,5 @@ public class AdminController {
     @PostMapping("/modifyPwd")
     Result modifyPwd(@RequestHeader("Authorization")String token, @RequestBody ChangePwdDTO changePwdDTO){
         return adminService.modifyPwd(token,changePwdDTO);
-    }
-
-    @PostMapping("/notification/publish")
-    Result addNotification(@RequestBody NotificationDTO notificationDTO){
-        return adminService.addNotification(notificationDTO);
-    }
-
-    @PostMapping("/notification/delete")
-    Result deleteNotification(@RequestParam Long id){
-        return adminService.deleteNotification(id);
     }
 }

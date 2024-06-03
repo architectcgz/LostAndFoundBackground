@@ -1,5 +1,6 @@
 package com.example.lostandfoundbackground.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.NotNull;
@@ -38,11 +39,13 @@ public class FoundItem implements Serializable {
     */
     @NotNull(message="[创建时间]不能为空")
     @ApiModelProperty("创建时间")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date createTime;
     /**
     * 更新时间
     */
     @ApiModelProperty("更新时间")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date updateTime;
     /**
     * 物品名称
@@ -80,6 +83,7 @@ public class FoundItem implements Serializable {
     */
     @NotNull(message="[发现时间]不能为空")
     @ApiModelProperty("发现时间")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date foundTime;
     /**
     * 详细描述

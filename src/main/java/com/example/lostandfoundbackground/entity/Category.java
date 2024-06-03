@@ -1,5 +1,6 @@
 package com.example.lostandfoundbackground.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.NotNull;
@@ -51,18 +52,27 @@ public class Category implements Serializable {
     * 创建用户的id
     */
     @ApiModelProperty("创建用户的id")
-    private Integer createUser;
+    private Long createUser;
+
+    /**
+     * 修改者的id
+     */
+    @ApiModelProperty("修改者的id")
+    private Long updateUser;
+
     /**
     * 创建时间
     */
     @NotNull(message="[创建时间]不能为空")
     @ApiModelProperty("创建时间")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date createTime;
     /**
     * 更新时间
     */
     @NotNull(message="[更新时间]不能为空")
     @ApiModelProperty("更新时间")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date updateTime;
 
 }

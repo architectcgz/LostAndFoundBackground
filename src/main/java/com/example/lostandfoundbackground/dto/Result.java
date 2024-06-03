@@ -29,7 +29,7 @@ public class Result {
         return new Result(HttpStatus.SUCCESS, "操作成功", data, total);
     }
     public static Result error(int code,String errorMsg){
-        return new Result(1, errorMsg, null, null);
+        return new Result(code, errorMsg, null, null);
     }
 
 }

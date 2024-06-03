@@ -21,9 +21,6 @@ public interface AdminService {
 
     Result modifyPwd(String token, ChangePwdDTO changePwdDTO);
 
-    Result addNotification(NotificationDTO notificationDTO);
-
     Result banAdmin(Long id);
-
-    Result deleteNotification(Long id);
+    Result refreshToken(String accessToken,String refreshToken);
 }
