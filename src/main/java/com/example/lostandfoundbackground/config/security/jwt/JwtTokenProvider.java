@@ -13,7 +13,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -144,23 +143,12 @@ public class JwtTokenProvider {
      * @param userDetails true/false
      * @return 有效为true,无效false
      */
-    public boolean validateToken(String token,SecurityUserDetails userDetails){
-        return getUserName(token).equals(userDetails.getUsername()) && isTokenExpired(token);
-    }
-
-    public boolean validateToken(String token, SecurityAdminDetails adminDetails){
-        return getUserName(token).equals(adminDetails.getUsername()) && isTokenExpired(token);
-    }
 
     public boolean validateToken(String token, UserDetails userDetails){
-        if(userDetails instanceof SecurityUserDetails){
-           return validateToken(token,(SecurityUserDetails) userDetails);
-        }else if(userDetails instanceof SecurityAdminDetails){
-            return validateToken(token,(SecurityAdminDetails) userDetails);
-        }
-        //注意如果不为上面的类型，直接验证失败
-        log.info("validateToken出现错误,要验证的类型为: "+userDetails.getClass());
-        return false;
+        log.info("getUserName(token).equals(userDetails.getUsername()): "+
+                getUserName(token).equals(userDetails.getUsername()));
+        log.info("isTokenExpired: "+ isTokenExpired(token));
+        return getUserName(token).equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 
     /**
@@ -171,7 +159,7 @@ public class JwtTokenProvider {
     private boolean isTokenExpired(String token)
     {
         //判断预设时间是否在当前时间之前，如果在当前时间之前，就表示过期了，会返回true
-        return !getExpiredDate(token).before(new Date());
+        return getExpiredDate(token).before(new Date());
     }
 
     /**

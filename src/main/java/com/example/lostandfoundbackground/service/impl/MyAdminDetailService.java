@@ -30,7 +30,7 @@ public class MyAdminDetailService implements UserDetailsService {
         Admin user = null;
         String jsonUser = RedisUtils.get(key);
         //将json反序列化为administrator类型
-        user = JsonUtils.jsonToJavaBean(jsonUser, Admin.class);
+        user = JsonUtils.jsonStrToJavaBean(jsonUser, Admin.class);
         if(user == null){
             user = adminMapper.findAdminBaseByPhone(username);
             if(user == null){

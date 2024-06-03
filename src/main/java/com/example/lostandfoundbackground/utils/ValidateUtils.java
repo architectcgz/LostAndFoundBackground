@@ -1,9 +1,9 @@
 package com.example.lostandfoundbackground.utils;
 
-import com.example.lostandfoundbackground.dto.LoginFormDTO;
-import com.example.lostandfoundbackground.dto.RegisterFormDTO;
-import com.example.lostandfoundbackground.dto.Result;
+import com.example.lostandfoundbackground.dto.*;
+import com.example.lostandfoundbackground.entity.Notification;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.ObjectUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -93,4 +93,43 @@ public class ValidateUtils {
         log.info("校验验证码的线程:"+Thread.currentThread().getName());
         return Result.ok("验证码验证成功");
     }
+
+    public static Map<String,Object> validateNotificationForm(NotificationDTO notificationDTO){
+        String title = notificationDTO.getTitle();
+        String description = notificationDTO.getDescription();
+        String content = notificationDTO.getContent();
+        Map<String,Object>resultMap = new HashMap<>();
+        //标题和内容不能为空,通知的描述可以为空
+        if(ObjectUtils.isEmpty(title)|| ObjectUtils.isEmpty(content)){
+            resultMap.put("valid",false);
+            resultMap.put("msg","标题或内容不能为空!");
+            return resultMap;
+        }
+        if(title.length()>20||description.length()>50||content.length()>2000){
+            resultMap.put("valid",false);
+            resultMap.put("msg","标题、描述和内容字数不得超出限制");
+            return resultMap;
+        }
+        resultMap.put("valid",true);
+        return resultMap;
+    }
+
+    public static Map<String,Object> validateCategoryDTO(CategoryDTO categoryDTO){
+        String categoryName = categoryDTO.getCategoryName();
+        String categoryAlias = categoryDTO.getCategoryAlias();
+        Map<String,Object> resultMap = new HashMap<>();
+        if(ObjectUtils.isEmpty(categoryName)||ObjectUtils.isEmpty(categoryAlias)){
+            resultMap.put("valid",false);
+            resultMap.put("msg","分类的名称或者别名不能为空!");
+            return resultMap;
+        }
+        if(categoryName.length()>10||categoryAlias.length()>10){
+            resultMap.put("valid",false);
+            resultMap.put("msg","分类的名称或别名最多10个字符");
+            return resultMap;
+        }
+        resultMap.put("valid",true);
+        return resultMap;
+    }
+
 }

@@ -67,10 +67,13 @@ public class TokenAuthFilter extends OncePerRequestFilter {
                 userDetails = userDetailService.loadUserByUsername(userName);
                 redisKey = LOGIN_USER_ACCESS_TOKEN;
             }
+
             log.info(redisKey+accessJwt);
             isTokenValid = RedisUtils.hasKey(redisKey + accessJwt);
             //如果redis中存有token,那么accessToken未过期,可以访问
             log.info("redis中是否存有token: "+isTokenValid);
+            log.info("jwtTokenProvider.validateToken(accessJwt,userDetails): "+jwtTokenProvider.validateToken(accessJwt,userDetails));
+
             if(jwtTokenProvider.validateToken(accessJwt,userDetails)&&isTokenValid){
                 SecurityContext context = SecurityContextHolder.createEmptyContext();
                 log.info("当前用户拥有的权限为: "+userDetails.getAuthorities().toString());
@@ -88,6 +91,5 @@ public class TokenAuthFilter extends OncePerRequestFilter {
             }
         }
         filterChain.doFilter(request,response);
-
     }
 }

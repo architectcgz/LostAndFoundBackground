@@ -36,7 +36,7 @@ public class JsonUtils {
     /*
         将Json转化为Java对象
      */
-    public static <T> T jsonToJavaBean(String text,Class<T>beanType){
+    public static <T> T jsonStrToJavaBean(String text, Class<T>beanType){
         try {
             return JSON.parseObject(text,beanType);
         }catch (JSONException e){
@@ -44,6 +44,8 @@ public class JsonUtils {
         }
         return null;
     }
+
+
 
     /*
         将Java对象序列化为Json

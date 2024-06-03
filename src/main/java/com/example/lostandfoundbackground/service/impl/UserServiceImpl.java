@@ -170,11 +170,7 @@ public class UserServiceImpl implements UserService {
         if(ObjectUtils.isEmpty(accessToken)){
             return Result.error(HttpStatus.UNAUTHORIZED,"没有accessToken,请先登录!");
         }
-        //服务器中没有这个user的上下文对象，说明这个人并没有登录
-        SecurityUserDetails userDetails = (SecurityUserDetails)SecurityContextUtils.getLocalUserDetail();
-        if(userDetails==null){
-            return Result.error(HttpStatus.UNAUTHORIZED,"请先登录");
-        }
+
         String jwtAccessToken = accessToken.substring(7);
         String userName = jwtTokenProvider.getUserName(jwtAccessToken);
 
@@ -202,11 +198,15 @@ public class UserServiceImpl implements UserService {
         RedisUtils.del(LOGIN_USER_ACCESS_TOKEN+ jwtAccessToken);
 
         //Redis中的RefreshToken刷新
+        String userJsonStr = RedisUtils.get(LOGIN_USER_PHONE+userName);
+        User user = JsonUtils.jsonStrToJavaBean(userJsonStr,User.class);
 
-        User user = userDetails.getUser();
         user.setRefreshToken(newRefreshToken);
+        //删除旧的refreshToken
         RedisUtils.del(LOGIN_USER_REFRESH_TOKEN+refreshToken);
-        RedisUtils.storeBeanAsHash(user,LOGIN_USER_REFRESH_TOKEN+newRefreshToken,REDIS_THREE_DAYS_EXPIRATION);
+        UserDTO userDTO = BeanUtil.copyProperties(user,UserDTO.class);
+
+        RedisUtils.storeBeanAsHash(userDTO,LOGIN_USER_REFRESH_TOKEN+newRefreshToken,REDIS_THREE_DAYS_EXPIRATION);
         //AccessToken保存20min
         RedisUtils.set(LOGIN_USER_ACCESS_TOKEN+newAccessToken,"ok",20L);
         //刷新loginUser的时间
@@ -245,7 +245,7 @@ public class UserServiceImpl implements UserService {
             if(RedisUtils.hasKey(key)){
                 String jsonUser = RedisUtils.get(key);
                 //将json反序列化为administrator类型
-                user = JsonUtils.jsonToJavaBean(jsonUser, User.class);
+                user = JsonUtils.jsonStrToJavaBean(jsonUser, User.class);
                 //在其他地点以及登录，删除上次登录的token，挤掉上次的登录
                 String oldRefreshToken = user.getRefreshToken();
                 String oldAccessToken = (String) RedisUtils.hget(LOGIN_USER_REFRESH_TOKEN+oldRefreshToken,"accessToken");

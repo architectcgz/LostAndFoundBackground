@@ -2,6 +2,8 @@ package com.example.lostandfoundbackground.config.security;
 import com.example.lostandfoundbackground.config.security.authManager.CustomAdminAuthManager;
 import com.example.lostandfoundbackground.config.security.authManager.DelegatingAuthManager;
 import com.example.lostandfoundbackground.config.security.filter.TokenAuthFilter;
+import com.example.lostandfoundbackground.config.security.handlers.CustomAccessDeniedHandler;
+import com.example.lostandfoundbackground.config.security.handlers.InvalidAuthEntryPoint;
 import com.example.lostandfoundbackground.config.security.jwt.JwtTokenProvider;
 import com.example.lostandfoundbackground.config.security.authManager.CustomUserAuthManager;
 import com.example.lostandfoundbackground.mapper.AdminMapper;
@@ -15,7 +17,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -30,13 +32,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @AllArgsConstructor
 @EnableWebSecurity
-@EnableGlobalAuthentication
+@EnableMethodSecurity
 @Slf4j
 public class SpringSecurityConfig {
 
     private final MyUserDetailService myUserDetailService;
     private final MyAdminDetailService myAdminDetailService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final InvalidAuthEntryPoint invalidAuthEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     private final UserMapper userMapper;
     private final AdminMapper adminMapper;
@@ -47,15 +51,9 @@ public class SpringSecurityConfig {
             "/user/login",
             "/notification/list",
             "/category/list",
-            "/user/refresh_token"
+            "/user/refresh_token",
+            "/admin/refresh_token"
     };
-    //这里是只有管理员能访问的url
-    private final String[]NON_OPEN_CATEGORY_LIST={
-            "/category/add",
-            "/category/update",
-            "/category/delete"
-    };
-
     @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
@@ -72,8 +70,6 @@ public class SpringSecurityConfig {
                 .formLogin(formLogin-> formLogin.disable())
                 // 禁用默认登出页
                 .logout(logout-> logout.disable())
-                // 设置异常的EntryPoint，如果不设置，默认使用Http403ForbiddenEntryPoint
-                .exceptionHandling(exceptions->exceptions.authenticationEntryPoint(new InvalidAuthEntryPoint()))
                 // 前后端分离是无状态的，不需要session了，直接禁用。
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
@@ -90,6 +86,11 @@ public class SpringSecurityConfig {
                 .authenticationProvider(new CustomAuthProvider(myUserDetailService,myAdminDetailService,passwordEncoder()))
                 .addFilterBefore(new TokenAuthFilter(jwtTokenProvider,myAdminDetailService,myUserDetailService),
                         UsernamePasswordAuthenticationFilter.class
+                )
+                // 设置异常的EntryPoint，如果不设置，默认使用Http403ForbiddenEntryPoint
+                .exceptionHandling(
+                        exceptions->exceptions.authenticationEntryPoint(invalidAuthEntryPoint)
+                                .accessDeniedHandler(customAccessDeniedHandler)
                 )
                 .build();
     }
