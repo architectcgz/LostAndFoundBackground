@@ -4,16 +4,12 @@ package com.example.lostandfoundbackground.constants;
  * @author archi
  */
 public class SystemConstants {
-    public static final String IMAGE_UPLOAD_DIR = "D:\\lesson\\nginx-1.18.0\\html\\hmdp\\imgs\\";
-    public static final String USER_NAME_PREFIX = "user_";
-    public static final String ADMIN_NAME_PREFIX = "admin_";
-
+    public static final String ROLE_PREFIX = "ROLE_";
     public static final String ROLE_USER = "USER";
 
     public static final String ROLE_ADMIN = "ADMIN";
     public static final int DEFAULT_PAGE_SIZE = 5;
     public static final int MAX_PAGE_SIZE = 10;
-
     //3 days
     public static final Long REFRESH_TOKEN_EXPIRATION = 259200000L;
 

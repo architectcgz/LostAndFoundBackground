@@ -21,4 +21,8 @@ public class RedisConstants {
     public static final String LOGIN_USER_PHONE = "login:user:phone:";
     public static final Long LOGIN_USER_TTL = 36000L;
 
+    public static final String LOST_ITEM_KEY = "lost:item:";
+
+    public static final String FOUND_ITEM_KEY = "found:item:";
+
 }
