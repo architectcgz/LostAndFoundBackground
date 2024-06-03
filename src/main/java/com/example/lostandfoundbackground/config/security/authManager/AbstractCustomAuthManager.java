@@ -36,7 +36,7 @@ public abstract class AbstractCustomAuthManager implements AuthenticationManager
         try {
             String jsonUser = RedisUtils.get(key);
             //将json反序列化为administrator类型
-            user = JsonUtils.jsonToJavaBean(jsonUser, getUserClass());
+            user = JsonUtils.jsonStrToJavaBean(jsonUser, getUserClass());
         }catch (Exception e){
             log.info(e.getMessage());
             throw new BadCredentialsException("1000");
