@@ -39,13 +39,13 @@ public class FoundItem implements Serializable {
     */
     @NotNull(message="[创建时间]不能为空")
     @ApiModelProperty("创建时间")
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
     /**
     * 更新时间
     */
     @ApiModelProperty("更新时间")
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date updateTime;
     /**
     * 物品名称
@@ -83,7 +83,7 @@ public class FoundItem implements Serializable {
     */
     @NotNull(message="[发现时间]不能为空")
     @ApiModelProperty("发现时间")
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private Date foundTime;
     /**
     * 详细描述
@@ -110,6 +110,6 @@ public class FoundItem implements Serializable {
     * 创建这条招领信息的用户id
     */
     @ApiModelProperty("创建这条招领信息的用户id")
-    private Integer createUser;
+    private Long createUser;
 
 }

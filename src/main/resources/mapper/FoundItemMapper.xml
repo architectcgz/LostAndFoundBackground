@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.lostandfoundbackground.mapper.FoundItemMapper">
+
+    <insert id="add" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into found_item
+        (name,image,category_id,found_location,found_time,description,
+        owner_name,phone,claimed,create_time,update_time,create_user)
+        values(
+            #{name},
+            #{image},
+            #{categoryId},
+            #{foundLocation},
+            #{foundTime},
+            #{description},
+            #{ownerName},
+            #{phone},
+            #{claimed},
+            NOW(),
+            NOW(),
+            #{createUser}
+        )
+
+    </insert>
+    <update id="update">
+        update found_item
+        <set>
+            <if test="name != #{name}">
+                name = #{name},
+            </if>
+            <if test="image != #{image}">
+                image = #{image},
+            </if>
+            <if test="category_id != #{categoryId}">
+                category_id = #{categoryId},
+            </if>
+            <if test="found_location != #{foundLocation}">
+                found_location = #{foundLocation},
+            </if>
+            <if test="found_time != #{foundTime}">
+                found_time = #{foundTime},
+            </if>
+            <if test="description != #{description}">
+                description = #{description},
+            </if>
+            <if test="owner_name != #{ownerName}">
+                owner_name = #{ownerName},
+            </if>
+            <if test="phone != phone">
+                phone = #{phone},
+            </if>
+            <if test="claimed != #{claimed}">
+                claimed = #{claimed},
+            </if>
+            update_time = NOW()
+        </set>
+
+
+    </update>
+    <delete id="deleteById">
+        delete from found_item
+        where id = #{id}
+    </delete>
+
+    <select id="searchByTitle" resultType="com.example.lostandfoundbackground.entity.FoundItem">
+        select name,image,category_id,found_location,found_time,description,
+        owner_name,phone,claimed,create_time,update_time,create_user
+        where name like CONCAT('%', #{name}, '%')
+    </select>
+</mapper>

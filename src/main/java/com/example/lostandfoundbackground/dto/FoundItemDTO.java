@@ -16,18 +16,17 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FoundItemDTO {
-    @NotNull(groups = Update.class,message = "id不能为空")
     private Long id;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
     private String name;
-    private Boolean claimed;
+    private Integer claimed;
     private String image;
     private Long categoryId;
     private String foundLocation;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime foundTime;
     private String description;
     private String ownerName;//失主名称
