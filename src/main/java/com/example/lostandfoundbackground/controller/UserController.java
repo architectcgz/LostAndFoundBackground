@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiOperation;
 import jakarta.annotation.Resource;
 import org.hibernate.validator.constraints.URL;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -23,6 +24,10 @@ public class UserController {
         return userService.login(loginForm);
     }
 
+    @PostMapping("/pwd/forget")
+    Result getBackPwd(@RequestBody ForgetPwdDTO forgetPwdDto){
+        return userService.forgetPwd(forgetPwdDto);
+    }
     @PostMapping("/logout")
     Result logout(@RequestHeader("Authorization")String token){
         return userService.logout(token);
@@ -80,5 +85,15 @@ public class UserController {
     @PostMapping("/name/update")
     public Result updateUserName(@RequestParam String newName){
         return userService.updateUserName(newName);
+    }
+
+    @GetMapping("/my-lost")
+    public Result getMyLostItems(@RequestParam int pageNum,@RequestParam int pageSize){
+        return userService.getMyLostInfo(pageNum,pageSize);
+    }
+
+    @GetMapping("/my-found")
+    public Result getMyFoundItems(@RequestParam int pageNum,@RequestParam int pageSize){
+        return userService.getMyFoundInfo(pageNum,pageSize);
     }
 }

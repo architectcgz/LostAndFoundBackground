@@ -52,7 +52,9 @@ public class SpringSecurityConfig {
             "/notification/list",
             "/category/list",
             "/user/refresh_token",
-            "/admin/refresh_token"
+            "/admin/refresh_token",
+            "/found/list",
+            "/lost/list"
     };
     @Bean
     public PasswordEncoder passwordEncoder(){

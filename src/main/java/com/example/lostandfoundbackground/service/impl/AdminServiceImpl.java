@@ -208,7 +208,7 @@ public class AdminServiceImpl implements AdminService {
         if(!AliYunSmsUtil.sendSmsAndSave(ADMIN_SMS_CODE_KEY,phone,smsCode)){
             return Result.error(1,"发送验证码失败");
         }
-        return Result.ok();
+        return Result.ok("验证码发送成功");
     }
 
     @Override

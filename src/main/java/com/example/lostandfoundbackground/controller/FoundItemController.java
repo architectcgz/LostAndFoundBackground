@@ -41,4 +41,18 @@ public class FoundItemController {
         return foundItemService.delete(id);
     }
 
+    @GetMapping("/list")
+    public Result previewList(@RequestParam int pageNum, @RequestParam int pageSize){
+        return foundItemService.previewList(pageNum,pageSize);
+    }
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
+    @GetMapping("/item-detail")
+    public Result getLostInfoDetailById(@RequestParam("id")Long id){
+        return foundItemService.getDetailById(id);
+    }
+
+    @GetMapping("/claimed-list")
+    public Result claimedList(@RequestParam int pageNum,@RequestParam int pageSize ){
+        return foundItemService.claimedList(pageNum,pageSize);
+    }
 }

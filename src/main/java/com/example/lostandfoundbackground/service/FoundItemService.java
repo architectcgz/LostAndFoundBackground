@@ -15,4 +15,10 @@ public interface FoundItemService {
     Result searchByTitle(String title);
 
     Result delete(Long id);
+
+    Result previewList(int pageNum, int pageSize);
+
+    Result getDetailById(Long id);
+
+    Result claimedList(int pageNum, int pageSize);
 }

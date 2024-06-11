@@ -19,4 +19,9 @@ public interface LostItemMapper {
     void deleteById(Long id);
 
     LostItem getDetailById(Long id);
+
+    List<LostItem> previewList();
+    List<LostItem> list();
+
+    List<LostItem> getLostPreviewByUserId(Long id, int pageNum, int pageSize);
 }

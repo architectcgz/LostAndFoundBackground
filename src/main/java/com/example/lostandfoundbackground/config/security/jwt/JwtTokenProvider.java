@@ -53,7 +53,7 @@ public class JwtTokenProvider {
 
     private Object generateExpirationDate(Long millis) {
         //预计失效时间为：token生成时间+预设期间
-        //这里设置成72小时过期 1000 * 60 * 60* 72, 1000ms = 1s
+        //RefreshToken这里设置成72小时过期 1000 * 60 * 60* 72, 1000ms = 1s
         return new Date(System.currentTimeMillis() + millis);
     }
 

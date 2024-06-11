@@ -8,10 +8,16 @@ import com.example.lostandfoundbackground.config.security.jwt.JwtTokenProvider;
 import com.example.lostandfoundbackground.config.security.userDetails.SecurityUserDetails;
 import com.example.lostandfoundbackground.constants.HttpStatus;
 import com.example.lostandfoundbackground.dto.*;
+import com.example.lostandfoundbackground.entity.FoundItem;
+import com.example.lostandfoundbackground.entity.LostItem;
 import com.example.lostandfoundbackground.entity.User;
+import com.example.lostandfoundbackground.mapper.FoundItemMapper;
+import com.example.lostandfoundbackground.mapper.LostItemMapper;
 import com.example.lostandfoundbackground.mapper.UserMapper;
 import com.example.lostandfoundbackground.service.UserService;
 import com.example.lostandfoundbackground.utils.*;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -36,8 +42,11 @@ public class UserServiceImpl implements UserService {
     @Resource
     private UserMapper userMapper;
     @Resource
+    private LostItemMapper lostItemMapper;
+    @Resource
+    private FoundItemMapper foundItemMapper;
+    @Resource
     private PasswordEncoder passwordEncoder;
-
     @Resource
     private AuthenticationManager authenticationManager;
 
@@ -46,6 +55,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Result register(RegisterFormDTO registerForm){
+        registerForm.setName(RandomUtil.randomString(RANDOM_STRING_BASE,8));
         //校验用户名、密码和手机号是否符合格式
         Map<String, Object>validateResult = ValidateUtils.validateRegisterForm(registerForm);
         Boolean isValid = (Boolean) validateResult.get("valid");
@@ -70,7 +80,7 @@ public class UserServiceImpl implements UserService {
         user.setAvatar("https://big-event-arc.oss-cn-hangzhou.aliyuncs.com/identicon.png");
         user.setName(registerForm.getName());
         user.setStatus(0);
-        user.setPassword(passwordEncoder.encode(registerForm.getCode()));
+        user.setPassword(passwordEncoder.encode(registerForm.getRepeatPwd()));
         user.setCreateTime(DateTime.now());
         user.setUpdateTime(DateTime.now());
         //删除验证码，防止多次注册
@@ -83,17 +93,8 @@ public class UserServiceImpl implements UserService {
             return Result.error(1,"数据保存错误!请联系管理员");
         }
         //如果数据库中保存成功再将信息保存到redis中
-        RedisUtils.storeBeanAsHash(user,LOGIN_USER_PHONE+user.getPhone(),LOGIN_USER_TTL);
-        //这里可以发放jwt,也可以不发放,登陆时一起发放
-        //        var jwt = jwtTokenProvider.generatorToken(
-        //                new SecurityUserDetails(
-        //                        user,
-        //                        AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_ADMIN"),
-        //                        true, true,
-        //                        true,true)
-        //        );
-        //        return Result.ok(jwt);
-        return Result.ok();
+        RedisUtils.storeBeanAsJson(user,LOGIN_USER_PHONE+user.getPhone(),LOGIN_USER_TTL);
+        return Result.ok("注册成功");
     }
 
     @Override
@@ -107,8 +108,17 @@ public class UserServiceImpl implements UserService {
     @Override
     public Result getUserInfo() {
         SecurityUserDetails userDetails = (SecurityUserDetails) SecurityContextUtils.getLocalUserDetail();
-        UserDTO userDTO = BeanUtil.copyProperties(userDetails.getUser(),UserDTO.class);
-        return Result.ok(userDTO);
+        if(userDetails==null){
+            return Result.error(HttpStatus.UNAUTHORIZED,"请先登陆!");
+        }
+        User user = userDetails.getUser();
+        JSONObject jsonObject = JsonUtils.stringToJsonObj(RedisUtils.get(LOGIN_USER_PHONE+user.getPhone()));
+        Long id = Long.parseLong(jsonObject.get("id").toString());
+        String name = (String) jsonObject.get("name");
+        String phone = (String) jsonObject.get("phone");
+        String avatar = (String) jsonObject.get("avatar");
+        UserInfoDTO userInfoDTO = new UserInfoDTO(id,phone,name,avatar);
+        return Result.ok(userInfoDTO);
     }
 
     @Override
@@ -120,13 +130,13 @@ public class UserServiceImpl implements UserService {
         userMapper.updateAvatar(user.getId(),avatarUrl);
         //更新redis中的数据
         JSONObject jsonObject = JsonUtils.stringToJsonObj(RedisUtils.get(LOGIN_USER_PHONE+user.getPhone()));
-        String token = (String) jsonObject.get("token");
+        String refreshToken = (String) jsonObject.get("refreshToken");
         jsonObject.replace("avatar",avatarUrl);
 
-        RedisUtils.set(LOGIN_USER_PHONE+user.getPhone(),jsonObject.toString());
+        RedisUtils.set(LOGIN_USER_PHONE+user.getPhone(),jsonObject.toString(),REDIS_ONE_WEEK_EXPIRATION);
 
-        RedisUtils.hset(LOGIN_USER_REFRESH_TOKEN +token,"avatar",avatarUrl);
-        return Result.ok();
+        RedisUtils.hset(LOGIN_USER_REFRESH_TOKEN + refreshToken,"avatar",avatarUrl);
+        return Result.ok("头像修改成功!");
     }
 
     @Override
@@ -134,14 +144,14 @@ public class UserServiceImpl implements UserService {
         //TODO 修改可以直接修改缓存中的内容，之后考虑使用MQ
         SecurityUserDetails userDetails = (SecurityUserDetails) SecurityContextUtils.getLocalUserDetail();
         User user = userDetails.getUser();
-        String username = userDetails.getUsername();
+        String username = user.getName();
         log.info("从SecurityContextHolder中获取到的上下文对象username为"+ user.getName());
         if(newName.equals(username)){
             return Result.error(1,"新用户名与旧用户名相同!");
         }
 
         if(!RegexUtils.isUserNameValid(newName)){
-            return Result.error(1,"用户名格式不正确!");
+            return Result.error(1,"用户名格式不正确(长度要在1-10个字符之间)!");
         }
 
         //更新数据库中的信息
@@ -149,13 +159,13 @@ public class UserServiceImpl implements UserService {
         userMapper.updateUserName(user.getId(),newName);
         //更新redis中的数据
         JSONObject jsonObject = JsonUtils.stringToJsonObj(RedisUtils.get(LOGIN_USER_PHONE+user.getPhone()));
-        String token = (String) jsonObject.get("token");
-        jsonObject.replace("avatar",newName);
+        String refreshToken = (String) jsonObject.get("refreshToken");
+        jsonObject.replace("name",newName);
 
-        RedisUtils.set(LOGIN_USER_PHONE+user.getPhone(),jsonObject.toString());
+        RedisUtils.set(LOGIN_USER_PHONE+user.getPhone(),jsonObject.toString(),REDIS_ONE_WEEK_EXPIRATION);
 
-        RedisUtils.hset(LOGIN_USER_REFRESH_TOKEN +token,"name",newName);
-        return Result.ok();
+        RedisUtils.hset(LOGIN_USER_REFRESH_TOKEN +refreshToken,"name",newName);
+        return Result.ok("用户名修改成功");
     }
     /*
         刷新token
@@ -186,6 +196,7 @@ public class UserServiceImpl implements UserService {
         }
 
         String newAccessToken = jwtTokenProvider.generateToken(userName,ROLE_USER,ACCESS_TOKEN_EXPIRATION);
+//        String newRefreshToken = jwtTokenProvider.generateToken(userName,ROLE_USER,REFRESH_TOKEN_EXPIRATION);
         String newRefreshToken = jwtTokenProvider.generateToken(userName,ROLE_USER,REFRESH_TOKEN_EXPIRATION);
 
         userInRedisJson.replace("refreshToken",newRefreshToken);
@@ -200,17 +211,18 @@ public class UserServiceImpl implements UserService {
         //Redis中的RefreshToken刷新
         String userJsonStr = RedisUtils.get(LOGIN_USER_PHONE+userName);
         User user = JsonUtils.jsonStrToJavaBean(userJsonStr,User.class);
-
         user.setRefreshToken(newRefreshToken);
+
         //删除旧的refreshToken
         RedisUtils.del(LOGIN_USER_REFRESH_TOKEN+refreshToken);
         UserDTO userDTO = BeanUtil.copyProperties(user,UserDTO.class);
-
+        userDTO.setAccessToken(newAccessToken);
         RedisUtils.storeBeanAsHash(userDTO,LOGIN_USER_REFRESH_TOKEN+newRefreshToken,REDIS_THREE_DAYS_EXPIRATION);
         //AccessToken保存20min
         RedisUtils.set(LOGIN_USER_ACCESS_TOKEN+newAccessToken,"ok",20L);
         //刷新loginUser的时间
-        RedisUtils.set(LOGIN_USER_PHONE+userName,JsonUtils.objToJsonString(userInRedisJson),REDIS_ONE_WEEK_EXPIRATION);
+        RedisUtils.del(LOGIN_USER_PHONE+userName);
+        RedisUtils.storeBeanAsJson(user,LOGIN_USER_PHONE+userName,REDIS_THREE_DAYS_EXPIRATION);
         Map<String,String>tokenMap = new HashMap<>(){
             {
                 put("accessToken",newAccessToken);
@@ -219,6 +231,50 @@ public class UserServiceImpl implements UserService {
         };
 
         return Result.ok(tokenMap);
+    }
+
+    @Override
+    public Result forgetPwd(ForgetPwdDTO forgetPwdDto) {
+        Map<String,Object> result = ValidateUtils.validateForgetPwdForm(forgetPwdDto);
+        //校验失败，返回错误信息
+        if(!(boolean)result.get("valid")){
+            return Result.error(1, (String) result.get("msg"));
+        }
+        String phone = forgetPwdDto.getPhone();
+        //校验成功，可以修改密码
+        String newPwd = passwordEncoder.encode(forgetPwdDto.getRepeatPwd());
+        userMapper.changePwdByPhone(phone,newPwd);
+        //清除已经登陆的信息
+        RedisUtils.del(USER_SMS_CODE_KEY+phone);
+        RedisUtils.del(LOGIN_USER_PHONE+phone);
+
+        return Result.ok();
+    }
+
+    @Override
+    public Result getMyLostInfo(int pageNum,int pageSize) {
+        SecurityUserDetails userDetails = (SecurityUserDetails) SecurityContextUtils.getLocalUserDetail();
+        User user = userDetails.getUser();
+        try {
+            PageHelper.startPage(pageNum,pageSize);
+            Page<LostItem> myLostInfo = (Page<LostItem>)lostItemMapper.getLostPreviewByUserId(user.getId(),pageNum,pageSize);
+            return Result.ok(myLostInfo.getResult(), myLostInfo.getTotal());
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    @Override
+    public Result getMyFoundInfo(int pageNum,int pageSize){
+        SecurityUserDetails userDetails = (SecurityUserDetails) SecurityContextUtils.getLocalUserDetail();
+        User user = userDetails.getUser();
+        try {
+            PageHelper.startPage(pageNum,pageSize);
+            Page<FoundItem> myLostInfo = (Page<FoundItem>)foundItemMapper.getFoundPreviewByUserId(user.getId(),pageNum,pageSize);
+            return Result.ok(myLostInfo.getResult(), myLostInfo.getTotal());
+        }catch (Exception e){
+            throw e;
+        }
     }
 
     @Override
@@ -236,7 +292,6 @@ public class UserServiceImpl implements UserService {
                         phone,password
                 )
         );
-        log.info("密码是否正确验证完成");
 
         //从redis中尝试查询user，不存在再去MySql查询
         User user = null;
@@ -246,16 +301,9 @@ public class UserServiceImpl implements UserService {
                 String jsonUser = RedisUtils.get(key);
                 //将json反序列化为administrator类型
                 user = JsonUtils.jsonStrToJavaBean(jsonUser, User.class);
-                //在其他地点以及登录，删除上次登录的token，挤掉上次的登录
-                String oldRefreshToken = user.getRefreshToken();
-                String oldAccessToken = (String) RedisUtils.hget(LOGIN_USER_REFRESH_TOKEN+oldRefreshToken,"accessToken");
-                log.info("OldRefreshToken: "+oldRefreshToken);
-                log.info("OldAccessToken: "+oldAccessToken);
-                RedisUtils.del(LOGIN_USER_ACCESS_TOKEN +oldAccessToken);
-                RedisUtils.del(LOGIN_USER_REFRESH_TOKEN+oldRefreshToken);
             }
         }catch (Exception e){
-            e.printStackTrace();
+            log.info(e.getMessage());
             return Result.error(1,e.getMessage());
         }
 
@@ -266,6 +314,15 @@ public class UserServiceImpl implements UserService {
                 return Result.error(1,"用户不存在");
             }
         }
+
+        //在其他地点以及登录，删除上次登录的token，挤掉上次的登录
+        String oldRefreshToken = user.getRefreshToken();
+        String oldAccessToken = (String) RedisUtils.hget(LOGIN_USER_REFRESH_TOKEN+oldRefreshToken,"accessToken");
+        log.info("OldRefreshToken: "+oldRefreshToken);
+        log.info("OldAccessToken: "+oldAccessToken);
+        RedisUtils.del(LOGIN_USER_ACCESS_TOKEN +oldAccessToken);
+        RedisUtils.del(LOGIN_USER_REFRESH_TOKEN+oldRefreshToken);
+
         String refreshToken = jwtTokenProvider.generateToken(user.getPhone(),ROLE_USER, REFRESH_TOKEN_EXPIRATION); //设置成72小时过期
         String accessToken = jwtTokenProvider.generateToken(user.getPhone(),ROLE_USER,ACCESS_TOKEN_EXPIRATION);//accessToken 20分钟过期
         user.setRefreshToken(refreshToken);
@@ -309,7 +366,7 @@ public class UserServiceImpl implements UserService {
         if(!AliYunSmsUtil.sendSmsAndSave(USER_SMS_CODE_KEY,phone,smsCode)){
             return Result.error(1,"发送验证码失败");
         }
-        return Result.ok();
+        return Result.ok("验证码发送成功");
     }
 
     @Override
@@ -321,7 +378,7 @@ public class UserServiceImpl implements UserService {
         if(!AliYunSmsUtil.sendSmsAndSave(USER_SMS_CODE_KEY,phone,smsCode)){
             return Result.error(1,"发送验证码失败");
         }
-        return Result.ok();
+        return Result.ok("验证码发送成功!");
     }
 
     @Override

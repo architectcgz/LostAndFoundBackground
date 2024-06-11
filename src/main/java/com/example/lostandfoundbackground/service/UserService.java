@@ -1,9 +1,6 @@
 package com.example.lostandfoundbackground.service;
 
-import com.example.lostandfoundbackground.dto.ChangePwdDTO;
-import com.example.lostandfoundbackground.dto.LoginFormDTO;
-import com.example.lostandfoundbackground.dto.RegisterFormDTO;
-import com.example.lostandfoundbackground.dto.Result;
+import com.example.lostandfoundbackground.dto.*;
 
 /**
  * @author archi
@@ -32,4 +29,10 @@ public interface UserService {
     Result updateUserName(String newName);
 
     Result refreshToken(String accessToken,String refreshToken);
+
+    Result forgetPwd(ForgetPwdDTO forgetPwdDto);
+
+    Result getMyLostInfo(int pageNum,int pageSize);
+
+    Result getMyFoundInfo(int pageNum, int pageSize);
 }

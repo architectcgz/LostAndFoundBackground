@@ -1,6 +1,7 @@
 package com.example.lostandfoundbackground.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.NotNull;
@@ -25,6 +26,7 @@ import org.hibernate.validator.constraints.Length;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Accessors(chain = true)
 public class FoundItem implements Serializable {
 
@@ -83,7 +85,7 @@ public class FoundItem implements Serializable {
     */
     @NotNull(message="[发现时间]不能为空")
     @ApiModelProperty("发现时间")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date foundTime;
     /**
     * 详细描述

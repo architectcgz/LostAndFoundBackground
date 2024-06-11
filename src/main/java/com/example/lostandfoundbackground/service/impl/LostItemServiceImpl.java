@@ -12,6 +12,8 @@ import com.example.lostandfoundbackground.service.LostItemService;
 import com.example.lostandfoundbackground.utils.JsonUtils;
 import com.example.lostandfoundbackground.utils.RedisUtils;
 import com.example.lostandfoundbackground.utils.SecurityContextUtils;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,6 +41,7 @@ public class LostItemServiceImpl implements LostItemService {
         }
 
         User user = userDetails.getUser();
+
         lostItem.setFounded(0);
         lostItem.setCreateUser(user.getId());
 
@@ -87,6 +90,16 @@ public class LostItemServiceImpl implements LostItemService {
             //将结果放到redis中,3天
             //RedisUtils.storeBeanAsJson(lostItem,LOST_ITEM_KEY+id,REDIS_THREE_DAYS_EXPIRATION);
         }
+        if(lostItem==null){
+            return Result.error(1,"没找到该物品的详情信息");
+        }
         return Result.ok(lostItem);
+    }
+
+    @Override
+    public Result previewList(int pageNum, int pageSize) {
+        PageHelper.startPage(pageNum,pageSize);
+        Page<LostItem> page = (Page<LostItem>)lostItemMapper.previewList();
+        return Result.ok(page.getResult(), page.getTotal());
     }
 }

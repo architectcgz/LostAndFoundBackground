@@ -1,20 +1,82 @@
 package com.example.lostandfoundbackground.utils;
 
 import com.example.lostandfoundbackground.dto.*;
-import com.example.lostandfoundbackground.entity.Notification;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.ObjectUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.example.lostandfoundbackground.constants.RedisConstants.ADMIN_SMS_CODE_KEY;
+import static com.example.lostandfoundbackground.constants.RedisConstants.USER_SMS_CODE_KEY;
 
 /**
  * @author archi
  */
 @Slf4j
 public class ValidateUtils {
+    public static Map<String,Object> validateForgetPwdForm(ForgetPwdDTO forgetPwdDTO){
+        String phone = forgetPwdDTO.getPhone();
+        String code = forgetPwdDTO.getCode();//验证码
+        String pwd = forgetPwdDTO.getPwd();
+        String repeatPwd = forgetPwdDTO.getRepeatPwd();
+        if(!RegexUtils.isPhoneValid(phone)){
+            return new HashMap<>(){
+                {
+                    put("valid",false);
+                    put("msg","手机号码格式不正确");
+                }
+            };
+        }
+        if(!RegexUtils.isPasswordValid(pwd)||!RegexUtils.isPasswordValid(repeatPwd)){
+            return new HashMap<>(){
+                {
+                    put("valid",false);
+                    put("msg","密码格式不正确!");
+                }
+            };
+        }
+        if(!pwd.equals(repeatPwd)){
+            return new HashMap<>(){
+                {
+                    put("valid",false);
+                    put("msg","两次输入的密码不同!");
+                }
+            };
+        };
+        //校验验证码
+        String s = USER_SMS_CODE_KEY +phone;
+        if(!RedisUtils.hasKey(s)){
+            return new HashMap<>(){
+                {
+                    put("valid",false);
+                    put("msg","验证码不存在");
+                }
+            };
+        }
+        Map<Object,Object> codeMap = RedisUtils.hmget(s);
+        String codeInRedis = (String) codeMap.get("code");
+        log.info("在Redis中保存的验证码是:"+codeInRedis);
+        if (codeInRedis == null || !codeInRedis.equals(code)) {
+            return new HashMap<>(){
+                {
+                    put("valid",false);
+                    put("msg","输入的验证码错误或已过期");
+                }
+            };
+        }
+
+        //验证码校验成功后，修改密码的接口开放5min，保证安全性
+        //校验过后,设置验证码中verified为true
+        RedisUtils.hset(s,"verified","true");
+        RedisUtils.expire(s,5L);
+        log.info("校验验证码的线程:"+Thread.currentThread().getName());
+        return new HashMap<>(){
+            {
+                put("valid",true);
+            }
+        };
+
+    }
     /*
     * 验证登录表单中的数据与是否正确
     * 正确返回true,错误返回false

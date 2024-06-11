@@ -4,7 +4,6 @@ import com.example.lostandfoundbackground.dto.LostItemDTO;
 import com.example.lostandfoundbackground.dto.Result;
 import com.example.lostandfoundbackground.service.LostItemService;
 import jakarta.annotation.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -42,8 +41,15 @@ public class LostItemController {
         return lostItemService.delete(id);
     }
 
-    @PreAuthorize("hasRole('USER','ADMIN')")
+    @GetMapping("/item-detail")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public Result getLostInfoDetailById(@RequestParam("id")Long id){
         return lostItemService.getDetailById(id);
     }
+
+    @GetMapping("/list")
+    public Result previewList(@RequestParam int pageNum, @RequestParam int pageSize){
+        return lostItemService.previewList(pageNum,pageSize);
+    }
+
 }

@@ -2,7 +2,6 @@ package com.example.lostandfoundbackground.service;
 
 import com.example.lostandfoundbackground.dto.LostItemDTO;
 import com.example.lostandfoundbackground.dto.Result;
-import jakarta.annotation.Resource;
 
 /**
  * @author archi
@@ -19,4 +18,5 @@ public interface LostItemService {
     Result getDetailById(Long id);
 
 
+    Result previewList(int pageNum, int pageSize);
 }

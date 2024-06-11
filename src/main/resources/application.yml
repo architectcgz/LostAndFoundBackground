@@ -3,9 +3,12 @@ spring:
     name: LostAndFoundBackground
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}
-    username: ${DB_USERNAME}
-    password: ${DB_PWD}
+    #url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    #username: ${DB_USERNAME}
+    #password: ${DB_PWD}
+    url: jdbc:mysql://${DB_HOST_LOCAL}:${DB_PORT_LOCAL}/${DB_NAME_LOCAL}
+    username: ${DB_USERNAME_LOCAL}
+    password: ${DB_PWD_LOCAL}
   data:
     redis:
       host: ${REDIS_HOST}
@@ -17,6 +20,8 @@ spring:
           max-idle: 10
           min-idle: 1
           time-between-eviction-runs: 10s
+  jackson:
+    time-zone: Asia/Shanghai
 
 mybatis:
   configuration:

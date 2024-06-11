@@ -1,6 +1,7 @@
 package com.example.lostandfoundbackground.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.NotNull;
 
@@ -25,6 +26,7 @@ import org.hibernate.validator.constraints.Length;
 @Setter
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class LostItem implements Serializable {
 
     /**

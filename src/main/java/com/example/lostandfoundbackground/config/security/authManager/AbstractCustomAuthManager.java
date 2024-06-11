@@ -33,26 +33,27 @@ public abstract class AbstractCustomAuthManager implements AuthenticationManager
         //从redis中尝试查询user，不存在再去MySql查询
         Object user = null;
         String key = getLoginKey() + phone;
-        try {
+        if(RedisUtils.hasKey(key)){
             String jsonUser = RedisUtils.get(key);
-            //将json反序列化为administrator类型
-            user = JsonUtils.jsonStrToJavaBean(jsonUser, getUserClass());
-        }catch (Exception e){
-            log.info(e.getMessage());
-            throw new BadCredentialsException("1000");
+            if(jsonUser!=null){
+                //将json反序列化为administrator类型
+                user = JsonUtils.jsonStrToJavaBean(jsonUser, getUserClass());
+            }
         }
 
         //redis中查询不到,从mysql中查询
         if(user == null){
             user = findUserByPhone(phone);
             if(user == null){
-                log.info("从Redis查询后发现用户不存在");
-                throw new BadCredentialsException("1000");
+                log.info("从数据库查询后发现用户不存在");
+                throw new BadCredentialsException("用户不存在");
             }
         }
-        if(passwordEncoder.encode(password).equals(getPassword(user))){
-            log.info("密码错误");
-            throw new BadCredentialsException("密码错误");
+        //注意这里要使用BCryptEncoder的match方法，不然每次加密结构都是不同的，密码都是错误!
+        if(!passwordEncoder.matches(password,getPassword(user))){
+            log.info("用户输入的pwd: "+password+"加密后的用户输入的pwd: "+passwordEncoder.encode(password));
+            log.info("数据库中用户的pwd: "+ getPassword(user));
+            throw new BadCredentialsException("用户密码错误");
         }
         List<GrantedAuthority> grantedAuths = new ArrayList<>();
         grantedAuths.add(new SimpleGrantedAuthority(getRole()));

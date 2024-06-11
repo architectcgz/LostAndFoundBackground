@@ -9,7 +9,7 @@ public abstract class RegexPatterns {
         用户名正则 1-10个中英文字符或数字
      */
 
-    public static final String USERNAME_REGEX = "^[\\u4e00-\\u9fa5a-zA-Z0-9]{1,10}$";
+    public static final String USERNAME_REGEX = "^[\\u4e00-\\u9fa5a-zA-Z0-9]{1,10}$";;
 
     /**
      * 手机号正则
@@ -19,7 +19,7 @@ public abstract class RegexPatterns {
     /*
     密码正则表达式 必须包含大小写字母和特殊符号，至少8位,最多20位
      */
-    public static final String PASSWORD_REGEX = "^(?![A-Za-z0-9]+$)(?![a-z0-9\\W]+$)(?![A-Za-z\\W]+$)(?![A-Z0-9\\W]+$)[a-zA-Z0-9\\W]{8,20}$";
+    public static final String PASSWORD_REGEX = "^(?![\\d]+$)(?![a-z]+$)(?![A-Z]+$)(?![!#$%^&*]+$)[\\da-zA-Z!#$%^&*]{8,16}$";;
     /**
      * 邮箱正则
      */

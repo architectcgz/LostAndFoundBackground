@@ -16,4 +16,14 @@ public interface FoundItemMapper {
     List<FoundItem> searchByTitle(String title);
 
     void deleteById(Long id);
+
+    List<FoundItem> list();
+
+    List<FoundItem> previewList();
+
+    FoundItem getDetailById(Long id);
+
+    List<FoundItem> cliamedList();
+
+    List<FoundItem> getFoundPreviewByUserId(Long id, int pageNum, int pageSize);
 }
